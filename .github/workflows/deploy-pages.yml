@@ -32,8 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Заодно включает Pages в настройках репозитория (source: GitHub Actions)
-      # и отдаёт base_path вида "/HooliB2B" для project site.
+      # Отдаёт base_path вида "/HooliB2B" — его мы прокидываем в сборку.
+      # Внимание: `enablement: true` пытается включить Pages, но дефолтному
+      # GITHUB_TOKEN не хватает прав на *создание* Pages-сайта
+      # ("Resource not accessible by integration"). В новом репозитории Pages
+      # нужно один раз включить вручную: Settings → Pages → Source: GitHub Actions.
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
