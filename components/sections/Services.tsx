@@ -1,0 +1,101 @@
+"use client";
+
+import { useRef } from "react";
+import { services } from "@/lib/content";
+import Section from "@/components/ui/Section";
+import Reveal from "@/components/ui/Reveal";
+import ServiceIcon from "@/components/ui/ServiceIcon";
+
+type Service = (typeof services)[number];
+
+function ServiceCard({ s }: { s: Service }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onMove = (e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--cx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--cy", `${e.clientY - r.top}px`);
+  };
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      className="glass group relative flex h-full flex-col overflow-hidden rounded-3xl p-6 transition-all duration-500 hover:-translate-y-1.5"
+    >
+      {/* подсветка, следующая за курсором */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(280px circle at var(--cx, 50%) var(--cy, 50%), color-mix(in oklab, ${s.accent} 22%, transparent), transparent 65%)`,
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{ boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${s.accent} 45%, transparent)` }}
+      />
+
+      <div className="relative z-10 flex h-full flex-col">
+        <div
+          className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--border)]"
+          style={{ background: `color-mix(in oklab, ${s.accent} 16%, transparent)`, color: s.accent }}
+        >
+          <ServiceIcon name={s.icon} className="h-6 w-6" />
+        </div>
+
+        <h3 className="text-xl font-semibold">{s.title}</h3>
+        <p className="mt-1 text-[0.8rem] font-medium uppercase tracking-wide" style={{ color: s.accent }}>
+          {s.tagline}
+        </p>
+        <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--muted)]">{s.description}</p>
+
+        <ul className="mt-5 grid gap-2">
+          {s.bullets.map((b) => (
+            <li key={b} className="flex items-start gap-2.5 text-[0.88rem] text-[var(--muted)]">
+              <svg viewBox="0 0 20 20" className="mt-[3px] h-4 w-4 shrink-0" fill="none" stroke={s.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 10.5l4 4 8-9" />
+              </svg>
+              {b}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-auto flex items-end justify-between gap-4 border-t border-[var(--border)] pt-5">
+          <div>
+            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Внедрение</div>
+            <div className="font-display text-lg font-semibold tabular">{s.setupFrom}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Подписка</div>
+            <div className="font-display text-lg font-semibold tabular" style={{ color: s.accent }}>
+              {s.subFrom}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Services() {
+  return (
+    <Section
+      id="services"
+      eyebrow="Что мы делаем"
+      title={<>Продукты, которые <span className="text-gradient">решают задачи</span></>}
+      subtitle="Берём готовые, проверенные шаблоны и адаптируем под ваш бизнес — это быстро и заметно дешевле разработки с нуля. Нужно что-то нестандартное? Соберём индивидуально."
+    >
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((s, i) => (
+          <Reveal key={s.id} delay={i * 70} className="h-full">
+            <ServiceCard s={s} />
+          </Reveal>
+        ))}
+      </div>
+    </Section>
+  );
+}
