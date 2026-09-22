@@ -1,5 +1,7 @@
 # HooliB2B — сайт-визитка
 
+**Живая версия: https://leankye.github.io/HooliB2B/**
+
 Одностраничный сайт (SPA) для B2B-сервиса разработки и сопровождения digital-продуктов.
 Анимации, живой фон, реагирующий на мышь, «liquid glass»-навигация, тёмная и светлая темы.
 
@@ -83,12 +85,13 @@ nginx, S3 — что угодно. Переменные окружения и б
 так что локальная разработка остаётся в корне и ничего не ломается — один и тот же код
 работает и на `localhost:3000`, и в подкаталоге на Pages.
 
-Что нужно сделать один раз в настройках репозитория:
+Pages уже включён (Source: GitHub Actions), так что деплой идёт сам при каждом пуше
+в `main` — никаких ручных шагов не нужно.
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-   Workflow пытается включить это сам (`configure-pages` с `enablement: true`),
-   но если первый запуск упал с ошибкой про Pages — переключите вручную и нажмите *Re-run*.
-2. Открыть **Actions → Deploy to GitHub Pages** и дождаться зелёной галочки.
+Если однажды будете поднимать Pages в новом репозитории: workflow пытается включить их
+сам (`configure-pages` с `enablement: true`), но дефолтному `GITHUB_TOKEN` не хватает прав
+на *создание* Pages-сайта (`Resource not accessible by integration`), поэтому нужен один
+ручной клик — **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
 Собрать и проверить версию для Pages локально (без GitHub):
 
