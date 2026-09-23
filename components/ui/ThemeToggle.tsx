@@ -12,7 +12,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isDark ? "Включить светлую тему" : "Включить тёмную тему"}
-      className="glass-nav group fixed right-4 top-[calc(var(--safe-top)+1rem)] z-50 flex h-11 w-11 items-center justify-center rounded-full sm:right-6 sm:top-[calc(var(--safe-top)+1.5rem)]"
+      className="glass-nav group fixed top-[calc(var(--safe-top)+1rem)] right-[calc(var(--safe-right)+1.25rem)] z-50 flex h-11 w-11 items-center justify-center rounded-full sm:right-[calc(var(--safe-right)+2rem)]"
     >
       <span className="relative block h-5 w-5">
         {/* солнце */}

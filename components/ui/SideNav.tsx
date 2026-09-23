@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/lib/content";
 import { scrollToId } from "@/components/providers/SmoothScroll";
@@ -9,37 +9,45 @@ import { scrollToId } from "@/components/providers/SmoothScroll";
 const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
 
 /**
- * На какой «дистанции» (в разделах) гаснет соседняя подпись. 1.15 — подпись
- * живёт, пока раздел не отъехал на 1.15 раздела от линии чтения.
+ * Высота строки «барабана» с названием раздела. Окно выше самой строки текста:
+ * тогда при перекатывании соседнее название успевает показаться и растаять.
+ * В окно ровно в строку смена читалась бы как мгновенная подмена слова.
  */
-const FADE_SPAN = 1.15;
+const ROLL_H = 30;
 
-/** Масштаб точки-маркера: в покое и на пике близости. */
-const DOT_MIN = 0.72;
-const DOT_MAX = 1.27;
+/** Растворение краёв окна: названия входят и уходят «из тумана». */
+const ROLL_FADE = "linear-gradient(180deg, transparent 0%, #000 26%, #000 74%, transparent 100%)";
+
+/**
+ * Перекатывание на один раздел. Заметно дольше «перелистывания»: название
+ * должно успеть прочитаться, а не мелькнуть. При `prefers-reduced-motion`
+ * длительность гасит глобальное правило в globals.css, так что барабан
+ * просто переставляется без движения.
+ */
+const ROLL_MS = 460;
 
 /**
  * Навигация.
  *
  * Десктоп (≥ lg) — прежний столбик «liquid glass» капсул с подписями слева.
  *
- * Телефон и планшет (< lg) — три части:
+ * Телефон и планшет (< lg) — две части, и ни одна из них не занимает место,
+ * отведённое контенту:
  *
- *   1. Компактная плашка «где я» слева сверху: текущий раздел написан словами,
- *      по нажатию открывается список всех разделов. Так нужный раздел находится
- *      даже при первом заходе, когда структура страницы ещё неизвестна.
+ *   1. Плашка «где я» слева сверху. Название раздела перекатывается в ней
+ *      барабаном, как счётчик таймера в iOS: шаг считается по прокрутке
+ *      (раздел меняется в тот момент, когда чтение уже перешло к следующему),
+ *      а сам барабан доворачивается пружинкой — поэтому смена читается глазом,
+ *      а не выглядит подменой. Ширина плашки равна самому длинному названию и
+ *      не меняется при перекате: на слове «Команда» она не «дышит».
+ *      Нажатие открывает список всех разделов.
  *
- *   2. Столбик точек слева по центру — прогресс по странице. Любая точка ведёт
- *      в свой раздел. Пока идёт прокрутка, рядом с точками проявляются подписи,
- *      и они «перетекают» друг в друга: чем ближе раздел к линии чтения, тем
- *      крупнее и ярче его название, тем мельче и прозрачнее соседние. Через
- *      секунду после остановки подписи гаснут — при чтении лента не мешает.
- *
- *   3. Нижний лист (bottom sheet) со всеми разделами и отметкой «сейчас» —
+ *   2. Нижний лист (bottom sheet) со всеми разделами и отметкой «сейчас» —
  *      удобно дотянуться большим пальцем.
  *
- * Ширина столбика подобрана под левый отступ секций (pl-12 = 48px): бокс
- * заканчивается на ~42px, поэтому колонка текста не «съедается» ни на пиксель.
+ * Столбика точек слева больше нет: он занимал край экрана и дублировал то,
+ * что и так видно в плашке. Левый отступ секций уменьшен с 48 до 20 px —
+ * он держался именно под ширину столбика.
  */
 export default function SideNav() {
   const pathname = usePathname();
@@ -50,110 +58,107 @@ export default function SideNav() {
   const clean = basePath && raw.startsWith(basePath) ? raw.slice(basePath.length) || "/" : raw;
   const isHome = clean === "/" || clean === "";
 
-  const [active, setActive] = useState(navItems[0].id);
+  // Индекс раздела у линии чтения — им поворачивается барабан в плашке.
+  const [activeIdx, setActiveIdx] = useState(0);
   const [open, setOpen] = useState(false);
-  // Подписи у столбика точек показываются только пока идёт прокрутка.
-  const [awake, setAwake] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
   const runnerRef = useRef<HTMLSpanElement>(null);
-  const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const wakeTimer = useRef(0);
 
-  /** Разбудить подписи столбика; погаснут через `ms` без новых прокруток. */
-  const wake = useCallback((ms = 900) => {
-    setAwake(true);
-    window.clearTimeout(wakeTimer.current);
-    wakeTimer.current = window.setTimeout(() => setAwake(false), ms);
-  }, []);
-
-  useEffect(() => () => window.clearTimeout(wakeTimer.current), []);
+  /*
+   * Раздел и его индекс. Барабан в плашке крутится по индексу, а список
+   * разделов и десктопный столбик сравнивают id — держим оба представления
+   * рядом, чтобы они не разъехались. Объявлены до эффектов: «бегунок»
+   * десктопного столбика зависит от `active`.
+   */
+  const active = navItems[activeIdx]?.id ?? navItems[0].id;
+  const activeLabel = navItems[activeIdx]?.label ?? navItems[0].label;
 
   /**
-   * Скролл-спай + непрерывная «позиция чтения». Считаем один раз на кадр.
+   * Скролл-спай + позиция чтения. Считаем один раз на кадр.
    *
-   * `p` — дробный номер раздела у линии чтения (0 — герой, 2.4 — середина между
-   * третьим и четвёртым разделом). Из него получаем и активный раздел (для плашки
-   * и списка), и вес каждой подписи в столбике — отсюда плавное «перетекание».
+   * `pos + frac` — дробный номер раздела у линии чтения (0 — герой, 2.4 —
+   * середина между третьим и четвёртым разделом). Из него получаются и
+   * активный раздел, и прогресс по странице, поэтому барабан в плашке и
+   * полоска прогресса не могут разойтись.
    */
   useEffect(() => {
     if (!isHome) return;
     let raf = 0;
-    const weights = new Array<number>(navItems.length).fill(-1);
+    /**
+     * Кэш позиций разделов.
+     *
+     * В документных координатах они меняются только при смене раскладки, а
+     * `getBoundingClientRect` заставляет браузер пересчитать стили и геометрию.
+     * Раньше мы читали их на каждом кадре прокрутки — теперь читаем один раз
+     * после загрузки, после подгрузки шрифтов и при изменении размера окна.
+     */
+    let tops: number[] = [];
+
+    const measure = () => {
+      const line = window.innerHeight * 0.34;
+      const base = window.scrollY;
+      tops = navItems.map((item) => {
+        const el = document.getElementById(item.id);
+        // Отсутствующий раздел — «бесконечность»: он никогда не станет текущим,
+        // а `frac` не сможет стать `NaN` (прежняя проверка на `null` пропускала
+        // `undefined` за последним разделом и глушила вычисления до перезагрузки).
+        return el ? el.getBoundingClientRect().top + base - line : Number.POSITIVE_INFINITY;
+      });
+    };
 
     const compute = () => {
       raf = 0;
       const scrollY = window.scrollY;
-      const line = window.innerHeight * 0.34;
-      const isMobile = window.innerWidth < 1024;
-
-      const tops: (number | null)[] = [];
-      for (const it of navItems) {
-        const el = document.getElementById(it.id);
-        tops.push(el ? el.getBoundingClientRect().top + scrollY - line : null);
-      }
 
       let pos = 0;
       for (let i = 0; i < tops.length; i++) {
-        const t = tops[i];
-        if (t !== null && scrollY >= t) pos = i;
+        if (scrollY >= tops[i]) pos = i;
       }
       /*
        * frac — насколько мы «подошли» к следующему разделу, 0..1. Отсчёт в
        * пикселях, а не в долях раздела: разделы очень разной высоты, и переход
        * должен занимать одинаковые ~0.85 экрана, а не всю предыдущую секцию.
        */
-      const next = tops[pos + 1];
+      const next: number | undefined = tops[pos + 1];
       const look = window.innerHeight * 0.85;
       let frac = 0;
-      if (next !== null) {
+      if (next !== undefined && Number.isFinite(next)) {
         frac = Math.min(1, Math.max(0, 1 - (next - scrollY) / Math.max(1, look)));
       }
 
-      // Активным считаем тот раздел, чья подпись на рельсе крупнее: при frac
-      // от 0.5 «на подходе» следующая весит больше текущей, а при frac = 1
-      // позиция перескакивает на него — без скачка, веса в этот момент равны.
+      /*
+       * Барабан поворачивается на середине подхода к следующему разделу —
+       * ровно там, где раньше «уравнивались» веса подписей на столбике.
+       * Раньше нельзя: человек ещё читает текущий раздел. Позже — он уже
+       * читает следующий, а плашка врёт.
+       */
       const idx = frac >= 0.5 && pos + 1 < navItems.length ? pos + 1 : pos;
-      const id = navItems[idx].id;
-      setActive((prev) => (prev === id ? prev : id));
-
-      if (!isMobile) return;
-
-      const p = pos + frac;
-      for (let i = 0; i < navItems.length; i++) {
-        const w = Math.max(0, Math.min(1, 1 - Math.abs(i - p) / FADE_SPAN));
-        if (Math.abs(w - weights[i]) < 0.004) continue;
-        weights[i] = w;
-
-        const dot = dotRefs.current[i];
-        if (dot) dot.style.transform = `scale(${(DOT_MIN + (DOT_MAX - DOT_MIN) * w).toFixed(3)})`;
-
-        const label = labelRefs.current[i];
-        if (label) {
-          // Прозрачность в квадрате: подпись «на подходе» почти невидима, но
-          // вспыхивает ровно тогда, когда раздел встаёт на линию чтения.
-          label.style.opacity = (w * w).toFixed(3);
-          label.style.transform = `translateY(-50%) scale(${(0.82 + 0.18 * w).toFixed(3)})`;
-        }
-      }
+      setActiveIdx((prev) => (prev === idx ? prev : idx));
     };
 
     const onScroll = () => {
-      wake();
       if (!raf) raf = requestAnimationFrame(compute);
     };
+    // Размер окна меняет и высоту «линии чтения», и позиции разделов.
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
 
+    measure();
     compute();
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
+    // Шрифты подгружаются асинхронно и могут сдвинуть разделы — перемеряем.
+    document.fonts?.ready.then(measure).catch(() => {});
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
     };
-  }, [isHome, wake]);
+  }, [isHome]);
 
   // Двигаем «бегунок» к активной кнопке (элемент есть только в десктопном столбике)
   useEffect(() => {
@@ -182,12 +187,10 @@ export default function SideNav() {
 
   if (!isHome) return null;
 
-  const activeLabel = navItems.find((n) => n.id === active)?.label ?? navItems[0].label;
-
   return (
     <>
       {/* ===================== Плашка «где я» (телефон и планшет) ===================== */}
-      <div className="fixed left-4 top-[calc(var(--safe-top)+1rem)] z-50 sm:left-6 lg:hidden">
+      <div className="fixed top-[calc(var(--safe-top)+1rem)] left-[calc(var(--safe-left)+1.25rem)] z-50 sm:left-[calc(var(--safe-left)+2rem)] lg:hidden">
         <button
           type="button"
           data-nav-pill
@@ -195,14 +198,52 @@ export default function SideNav() {
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={`Разделы страницы. Текущий: ${activeLabel}`}
-          className="glass-nav flex h-10 items-center gap-2 rounded-full pl-3.5 pr-3 text-[0.8rem] font-medium"
+          className="glass-nav relative flex h-11 items-center gap-2.5 rounded-full pl-3.5 pr-3.5 text-[0.82rem] font-medium"
         >
           <span
             aria-hidden
-            className="h-1.5 w-1.5 rounded-full"
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
             style={{ background: "linear-gradient(120deg, var(--glow-1), var(--glow-3))" }}
           />
-          {activeLabel}
+          {/*
+            Барабан названий. Ширину окна задаёт невидимый дублёр, в котором
+            лежат сразу все названия: она равна самому длинному из них и не
+            меняется при перекате — поэтому плашка не «дышит» на коротких
+            словах. Края окна растворяет маска, и перекатывающаяся строка
+            входит и уходит «из тумана», как строка счётчика в таймере iOS.
+          */}
+          <span aria-hidden className="relative inline-grid">
+            <span className="invisible col-start-1 row-start-1 inline-grid">
+              {navItems.map((item) => (
+                <span key={item.id} className="col-start-1 row-start-1 whitespace-nowrap">
+                  {item.label}
+                </span>
+              ))}
+            </span>
+            <span
+              className="col-start-1 row-start-1 block overflow-hidden"
+              style={{ height: ROLL_H, maskImage: ROLL_FADE, WebkitMaskImage: ROLL_FADE }}
+            >
+              <span
+                className="block transition-transform ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                style={{
+                  transitionDuration: `${ROLL_MS}ms`,
+                  transform: `translateY(${-activeIdx * ROLL_H}px)`,
+                  willChange: "transform",
+                }}
+              >
+                {navItems.map((item) => (
+                  <span
+                    key={item.id}
+                    className="flex items-center justify-center whitespace-nowrap"
+                    style={{ height: ROLL_H }}
+                  >
+                    {item.label}
+                  </span>
+                ))}
+              </span>
+            </span>
+          </span>
           <svg
             aria-hidden
             viewBox="0 0 24 24"
@@ -281,71 +322,6 @@ export default function SideNav() {
           </ul>
         </div>
       </div>
-      {/* ===================== Столбик точек с перетекающими подписями ===================== */}
-      <nav
-        aria-label="Разделы страницы"
-        // Прикосновение к рельсу — тоже повод показать названия: человек,
-        // который не понял, что это навигация, сразу увидит подписи.
-        onPointerDown={() => wake(2600)}
-        className="fixed left-1.5 top-1/2 z-40 -translate-y-1/2 lg:hidden"
-      >
-        <ul className="glass-nav flex flex-col items-center gap-0.5 rounded-full px-1.5 py-2">
-          {navItems.map((item, idx) => {
-            const isActive = active === item.id;
-            return (
-              <li key={item.id} className="relative">
-                <button
-                  type="button"
-                  onClick={() => go(item.id)}
-                  aria-label={item.label}
-                  aria-current={isActive ? "true" : undefined}
-                  className="flex h-9 w-6 items-center justify-center"
-                >
-                  <span
-                    aria-hidden
-                    ref={(el) => {
-                      dotRefs.current[idx] = el;
-                    }}
-                    className="block h-[7px] w-[7px] rounded-full"
-                    style={{
-                      transform: `scale(${DOT_MIN})`,
-                      background: isActive
-                        ? "linear-gradient(120deg, var(--glow-1), var(--glow-3))"
-                        : "color-mix(in oklab, var(--fg) 32%, transparent)",
-                      boxShadow: isActive
-                        ? "0 0 12px 1px color-mix(in oklab, var(--glow-2) 65%, transparent)"
-                        : "none",
-                      transition: "background 300ms ease, box-shadow 300ms ease",
-                    }}
-                  />
-                </button>
-                {/*
-                  Подпись позиционируется абсолютно, поэтому не расширяет столбик
-                  и не заезжает на колонку текста. Прозрачность внешнего слоя —
-                  «проснулись/уснули» (CSS-переход), внутреннего — близость раздела
-                  (переписывается каждый кадр без перехода, чтобы не отставать).
-                */}
-                <span
-                  aria-hidden
-                  className={`pointer-events-none absolute left-[calc(100%+0.4rem)] top-1/2 transition-opacity duration-300 ${
-                    awake ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <span
-                    ref={(el) => {
-                      labelRefs.current[idx] = el;
-                    }}
-                    className="pill block origin-left whitespace-nowrap rounded-full border border-[var(--border)] px-3 py-1.5 text-[0.82rem] font-medium transition-none"
-                    style={{ opacity: 0, transform: "translateY(-50%) scale(0.82)" }}
-                  >
-                    {item.label}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
       {/* ===================== Десктопная навигация (как была) ===================== */}
       <nav
         aria-label="Навигация по разделам"

@@ -68,7 +68,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] items-center pl-12 pr-5 pb-24 pt-[calc(var(--safe-top)+7rem)] sm:pl-16 sm:pr-8 sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48"
+      className="relative flex min-h-[100svh] items-center pb-24 pl-[calc(var(--safe-left)+1.25rem)] pr-[calc(var(--safe-right)+1.25rem)] pt-[calc(var(--safe-top)+7rem)] sm:pl-[calc(var(--safe-left)+2rem)] sm:pr-[calc(var(--safe-right)+2rem)] sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48"
     >
       <div className="mx-auto w-full max-w-6xl">
         <motion.div {...up(0.05)} className="pill mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-[0.75rem] font-medium tracking-wide text-[var(--muted)]">

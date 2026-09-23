@@ -28,7 +28,7 @@ export default async function PartnerPage({ params }: { params: Promise<{ slug: 
   if (!partner) notFound();
 
   return (
-    <main className="relative pb-[calc(var(--safe-bottom)+5rem)] pl-5 pr-5 pt-[calc(var(--safe-top)+7rem)] sm:pl-16 sm:pr-8 sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48">
+    <main className="relative pb-[calc(var(--safe-bottom)+5rem)] pl-[calc(var(--safe-left)+1.25rem)] pr-[calc(var(--safe-right)+1.25rem)] pt-[calc(var(--safe-top)+7rem)] sm:pl-[calc(var(--safe-left)+2rem)] sm:pr-[calc(var(--safe-right)+2rem)] sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48">
       <div className="mx-auto w-full max-w-5xl">
         <Reveal>
           <Link
