@@ -37,8 +37,10 @@ export default function Team() {
             <div className="glass group relative h-full overflow-hidden rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-1.5">
               <span
                 aria-hidden
-                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-70"
-                style={{ background: m.accent }}
+                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-45 transition-opacity duration-500 group-hover:opacity-75"
+                style={{
+                  background: `radial-gradient(closest-side, color-mix(in oklab, ${m.accent} 70%, transparent), color-mix(in oklab, ${m.accent} 28%, transparent) 45%, transparent 78%)`,
+                }}
               />
               <div className="relative z-10">
                 <span

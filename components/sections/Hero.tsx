@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { metrics } from "@/lib/content";
 import { scrollToId } from "@/components/providers/SmoothScroll";
 
@@ -9,25 +9,43 @@ const words = ["сайты", "CRM-системы", "AI-ассистентов", 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
 function RotatingWord() {
-  const [i, setI] = useState(0);
+  // Храним и текущее слово, и предыдущее: уходящее уезжает вверх, остальные
+  // ждут внизу. Получается «перелистывание» вместо простого мигания.
+  const [{ i, prev }, setState] = useState({ i: 0, prev: 0 });
   useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % words.length), 2600);
+    const t = setInterval(
+      () => setState((s) => ({ i: (s.i + 1) % words.length, prev: s.i })),
+      2600,
+    );
     return () => clearInterval(t);
   }, []);
+
   return (
-    <span className="relative inline-block align-bottom">
-      <AnimatePresence mode="wait" initial={false}>
+    /*
+     * Все слова лежат в одной ячейке grid, поэтому ширина блока равна самому
+     * длинному слову и НИКОГДА не меняется. Раньше слово было inline-block и при
+     * каждой смене размонтировалось: ширина схлопывалась до нуля, абзац
+     * переверстывался, «AI-ассистентов» перескакивал на другую строку — и
+     * страница прыгала на ~28 px. Теперь верстка стабильна, а слова просто
+     * сменяют друг друга прозрачностью.
+     *
+     * На узком экране слот всё равно не помещается в строку и оставлял бы пустое
+     * место посередине предложения, поэтому до `md` слово занимает строку целиком
+     * и стоит по центру — как выделенная вставка.
+     */
+    <span className="relative inline-grid w-full text-center align-baseline md:w-auto">
+      {words.map((word, idx) => (
         <motion.span
-          key={words[i]}
-          initial={{ y: 16, opacity: 0, filter: "blur(6px)" }}
-          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-          exit={{ y: -16, opacity: 0, filter: "blur(6px)" }}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="text-gradient inline-block font-semibold"
+          key={word}
+          aria-hidden={idx !== i}
+          initial={false}
+          animate={idx === i ? { opacity: 1, y: 0 } : { opacity: 0, y: idx === prev ? -14 : 14 }}
+          transition={{ duration: 0.45, ease: EASE }}
+          className="text-gradient col-start-1 row-start-1 font-semibold"
         >
-          {words[i]}
+          {word}
         </motion.span>
-      </AnimatePresence>
+      ))}
     </span>
   );
 }
@@ -45,7 +63,7 @@ export default function Hero() {
       className="relative flex min-h-[100svh] items-center pl-11 pr-5 pb-24 pt-28 sm:pl-16 sm:pr-8 sm:pt-32 lg:pl-48"
     >
       <div className="mx-auto w-full max-w-6xl">
-        <motion.div {...up(0.05)} className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-[0.75rem] font-medium tracking-wide text-[var(--muted)] backdrop-blur-md">
+        <motion.div {...up(0.05)} className="pill mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-[0.75rem] font-medium tracking-wide text-[var(--muted)]">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--glow-3)] opacity-70" style={{ animation: "pulse-ring 2.4s ease-out infinite" }} />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--glow-3)]" />
@@ -55,8 +73,9 @@ export default function Hero() {
 
         <div
           style={{
+            // --px/--py обнуляются на тач-устройствах: следить за «курсором» там нечем.
             transform:
-              "translate3d(calc((var(--mx, 0.5) - 0.5) * -18px), calc((var(--my, 0.5) - 0.5) * -14px), 0)",
+              "translate3d(calc((var(--mx, 0.5) - 0.5) * var(--px, 1) * -18px), calc((var(--my, 0.5) - 0.5) * var(--py, 1) * -14px), 0)",
           }}
         >
           <motion.h1

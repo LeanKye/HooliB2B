@@ -31,7 +31,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
                 "linear-gradient(180deg, color-mix(in oklab, var(--glow-2) 20%, transparent), transparent 55%)",
             }}
           />
-          <span className="absolute right-5 top-5 rounded-full border border-[var(--border-strong)] bg-[var(--card)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] backdrop-blur-md">
+          <span className="pill absolute right-5 top-5 rounded-full border border-[var(--border-strong)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em]">
             Популярный
           </span>
         </>

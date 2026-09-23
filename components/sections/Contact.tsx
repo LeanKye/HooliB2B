@@ -23,7 +23,7 @@ export default function Contact() {
             />
             <div className="relative z-10 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-center">
               <div>
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--card-strong)] px-3.5 py-1.5 text-[0.72rem] font-medium uppercase tracking-[0.18em] backdrop-blur-md">
+                <div className="pill mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] px-3.5 py-1.5 text-[0.72rem] font-medium uppercase tracking-[0.18em]">
                   <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[var(--glow-1)] to-[var(--glow-4)]" />
                   Начнём?
                 </div>

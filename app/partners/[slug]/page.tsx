@@ -79,7 +79,7 @@ export default async function PartnerPage({ params }: { params: Promise<{ slug: 
                 {partner.services.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3.5 py-1.5 text-[0.78rem] text-[var(--muted)] backdrop-blur-md"
+                    className="pill rounded-full border border-[var(--border)] px-3.5 py-1.5 text-[0.78rem] text-[var(--muted)]"
                   >
                     {s}
                   </span>

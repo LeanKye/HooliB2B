@@ -17,7 +17,7 @@ export default function Section({ id, eyebrow, title, subtitle, children, classN
         <Reveal>
           <header className="mb-10 max-w-3xl sm:mb-16">
             {eyebrow && (
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-3.5 py-1.5 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-[var(--muted)] backdrop-blur-md">
+              <div className="pill mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3.5 py-1.5 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[var(--glow-1)] to-[var(--glow-3)]" />
                 {eyebrow}
               </div>
