@@ -9,7 +9,7 @@ const contacts = [
 
 export default function Contact() {
   return (
-    <section id="contact" className="relative scroll-mt-24 pl-11 pr-5 py-20 sm:pl-16 sm:pr-8 sm:py-28 lg:pl-48">
+    <section id="contact" className="relative scroll-mt-24 pl-12 pr-5 py-20 sm:pl-16 sm:pr-8 sm:py-28 lg:pl-48">
       <div className="mx-auto w-full max-w-6xl">
         <Reveal>
           <div className="glass-strong relative overflow-hidden rounded-[2rem] p-7 sm:p-12">
@@ -76,7 +76,7 @@ export default function Contact() {
 
 export function Footer() {
   return (
-    <footer className="relative pb-28 pl-11 pr-5 pt-6 sm:pb-16 sm:pl-16 sm:pr-8 lg:pl-48">
+    <footer className="relative pb-[calc(var(--safe-bottom)+5rem)] pl-12 pr-5 pt-6 sm:pb-[calc(var(--safe-bottom)+4rem)] sm:pl-16 sm:pr-8 lg:pl-48">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 border-t border-[var(--border)] pt-8 sm:flex-row sm:items-center sm:justify-between">
         <Logo withText />
         <p className="text-[0.8rem] text-[var(--muted)]">

@@ -23,6 +23,18 @@
   --glow-3: #22d3ee;
   --glow-4: #f472b6;
   --grid: rgba(12, 20, 40, 0.05);
+  /*
+   * Крайние тона авроры. Ими затят фон за пределами вьюпорта (канвас и чуть
+   * выступающий фиксированный слой): при «резиновой» прокрутке iOS и в полосах
+   * вокруг выреза камеры/домашнего индикатора не проступает чёрный.
+   */
+  --edge-top: #d9e1f7;
+  --edge-bottom: #f0e6f5;
+  /* Отступы «безопасной зоны»: вырез камеры сверху, домашний индикатор снизу. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
   /* Множители параллакса фона. На устройствах без курсора обнуляются (см. ниже). */
   --px: 1;
   --py: 1;
@@ -52,6 +64,8 @@
   --border-strong: rgba(255, 255, 255, 0.18);
   --shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
   --grid: rgba(255, 255, 255, 0.045);
+  --edge-top: #2e316f;
+  --edge-bottom: #150f27;
   color-scheme: dark;
 }
 
@@ -64,9 +78,17 @@
  * `scroll-behavior: smooth` тут намеренно НЕ ставится: на десктопе плавный
  * скролл делает Lenis, на тач-устройствах — нативный scrollTo({behavior}).
  * CSS-правило конфликтовало с ними и давало рывки.
+ *
+ * Фон на самом <html> — это канвас браузера. Именно он виден в «полосах» над и
+ * под страницей, когда iOS уводит вьюпорт за край (оттяжка пальцем) и вокруг
+ * выреза камеры. Раньше канвас был прозрачным, а body — почти чёрным (#04060c),
+ * отсюда и «чёрные полосы», в которые «уезжали» элементы. Теперь канвас
+ * выкрашен в тон авроры, а оттяжка отключена вовсе.
  */
 html {
   -webkit-text-size-adjust: 100%;
+  background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
+  overscroll-behavior: none;
 }
 
 html.lenis,
@@ -83,6 +105,7 @@ body {
   color: var(--fg);
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.5s ease, color 0.5s ease;
 }
@@ -276,29 +299,40 @@ p { text-wrap: pretty; }
  * Блок стоит В САМОМ КОНЦЕ файла намеренно: он переопределяет .glass, .reveal и
  * .text-gradient, а при равной специфичности побеждает то правило, что ниже.
  *
- * На телефонах и планшетах backdrop-filter заставляет GPU пересобирать кадр
- * целиком — а наши «стёкла» лежат поверх анимированного canvas, то есть
- * пересчёт идёт 60 раз в секунду. Отсюда нагрев корпуса и рывки при скролле.
- * Заменяем матовое стекло на почти непрозрачный фон: визуально почти не
- * отличается, зато фон под карточками больше не перерисовывается.
+ * На телефонах и планшетах backdrop-filter заставляет GPU размывать область
+ * за элементом заново на каждом кадре анимации. «Жидкое стекло» мы оставляем
+ * только там, где оно почти бесплатно: навигация и «пилюли» либо зафиксированы
+ * (фон под ними при скролле не движется), либо малы по площади. Крупные
+ * карточки во весь экран теряют blur, но сохраняют многослойный глянец —
+ * визуально это по-прежнему стекло.
  */
 @media (hover: none), (pointer: coarse) {
-  .glass,
-  .glass-strong,
+  /* Мелкие элементы: возвращаем настоящее матовое стекло. */
   .glass-nav,
   .pill {
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
+  }
+
+  /* Крупные полотна: blur убираем, глянец — усиливаем. */
+  .glass,
+  .glass-strong {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  .glass { background: color-mix(in oklab, var(--bg-2) 90%, transparent); }
-  .glass-strong { background: color-mix(in oklab, var(--bg-2) 95%, transparent); }
-  .glass-nav { background: color-mix(in oklab, var(--bg-2) 88%, transparent); }
-  .pill { background: color-mix(in oklab, var(--bg-2) 92%, transparent); }
+  .glass {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0) 46%),
+      color-mix(in oklab, var(--bg-2) 74%, transparent);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
 
-  /* Активный пункт навигации — тот же фон, но с фиолетовым оттенком. */
-  .glass-nav[data-active="true"] {
-    background: color-mix(in oklab, var(--glow-2) 22%, color-mix(in oklab, var(--bg-2) 88%, transparent));
+  .glass-strong {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%),
+      color-mix(in oklab, var(--bg-2) 84%, transparent);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 
   /* Зерно во весь экран с режимом наложения — дорогая операция для композитора. */
@@ -314,5 +348,12 @@ p { text-wrap: pretty; }
     animation: none;
     background-size: 100% 100%;
   }
+
+  /*
+   * Пока идёт прокрутка, «дыхание» аврора-пятен останавливаем. Иначе фон под
+   * каждым стеклянным элементом меняется каждый кадр, и backdrop-filter
+   * пересчитывается на 60 кадрах в секунду — именно это и грело корпус.
+   */
+  html.is-scrolling .animate-floaty { animation-play-state: paused; }
 }
 

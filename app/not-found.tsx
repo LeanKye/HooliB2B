@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="relative flex min-h-[100svh] items-center justify-center px-5 py-28">
+    <main className="relative flex min-h-[100svh] items-center justify-center px-5 pb-[calc(var(--safe-bottom)+7rem)] pt-[calc(var(--safe-top)+7rem)]">
       <div className="glass-strong max-w-lg rounded-[2rem] p-10 text-center">
         <div className="font-display text-6xl font-semibold text-gradient">404</div>
         <h1 className="mt-4 text-2xl font-semibold">Страница не найдена</h1>

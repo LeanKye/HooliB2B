@@ -12,7 +12,7 @@ type Props = {
 /** Обёртка секции с заголовком и плавным появлением. */
 export default function Section({ id, eyebrow, title, subtitle, children, className = "" }: Props) {
   return (
-    <section id={id} className={`relative scroll-mt-24 pl-11 pr-5 py-20 sm:pl-16 sm:pr-8 sm:py-28 lg:pl-48 ${className}`}>
+    <section id={id} className={`relative scroll-mt-24 pl-12 pr-5 py-20 sm:pl-16 sm:pr-8 sm:py-28 lg:pl-48 ${className}`}>
       <div className="mx-auto w-full max-w-6xl">
         <Reveal>
           <header className="mb-10 max-w-3xl sm:mb-16">

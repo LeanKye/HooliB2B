@@ -172,9 +172,14 @@ export default function AuroraBackground() {
 
     const onScroll = () => {
       scrolling = true;
+      // Пока идёт прокрутка, «дыхание» аврора-пятен на паузе: иначе фон под
+      // стеклянными элементами меняется каждый кадр и backdrop-filter
+      // пересчитывается непрерывно (см. globals.css).
+      document.documentElement.classList.add("is-scrolling");
       window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(() => {
         scrolling = false;
+        document.documentElement.classList.remove("is-scrolling");
         if (!raf && visible) raf = requestAnimationFrame(frame);
       }, 140);
     };
@@ -207,6 +212,7 @@ export default function AuroraBackground() {
       cancelAnimationFrame(raf);
       window.clearTimeout(scrollTimer);
       window.clearTimeout(resizeTimer);
+      document.documentElement.classList.remove("is-scrolling");
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerleave", onLeave);
@@ -216,7 +222,18 @@ export default function AuroraBackground() {
   }, []);
 
   return (
-    <div ref={wrapRef} aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    /*
+     * Слой чуть больше вьюпорта по вертикали (по 8% сверху и снизу). Так любой
+     * «зазор», который iOS оставляет у края экрана при оттяжке пальцем или в
+     * момент инерционного скролла, остаётся закрашенным авророй, а не чёрным
+     * канвасом. Раньше слой был ровно `inset-0`, и на iPhone это читалось как
+     * чёрные полосы сверху и снизу.
+     */
+    <div
+      ref={wrapRef}
+      aria-hidden
+      className="pointer-events-none fixed inset-x-0 top-[-8%] bottom-[-8%] z-0 overflow-hidden"
+    >
       <div
         className="absolute inset-0"
         style={{

@@ -22,26 +22,34 @@ function RotatingWord() {
 
   return (
     /*
-     * Все слова лежат в одной ячейке grid, поэтому ширина блока равна самому
-     * длинному слову и НИКОГДА не меняется. Раньше слово было inline-block и при
-     * каждой смене размонтировалось: ширина схлопывалась до нуля, абзац
-     * переверстывался, «AI-ассистентов» перескакивал на другую строку — и
-     * страница прыгала на ~28 px. Теперь верстка стабильна, а слова просто
-     * сменяют друг друга прозрачностью.
+     * Слово живёт в капсуле внутри предложения, а не отдельной центрированной
+     * строкой. Все слова лежат в одной ячейке grid, поэтому ширина блока равна
+     * самому длинному слову и НИКОГДА не меняется — абзац не переверстывается и
+     * страница не прыгает. Раньше слово было inline-block и при каждой смене
+     * размонтировалось: ширина схлопывалась до нуля, «AI-ассистентов»
+     * перескакивал на другую строку и верстка дёргалась на ~28 px.
      *
-     * На узком экране слот всё равно не помещается в строку и оставлял бы пустое
-     * место посередине предложения, поэтому до `md` слово занимает строку целиком
-     * и стоит по центру — как выделенная вставка.
+     * Зарезервированное место под самое длинное слово читается как осознанный
+     * элемент интерфейса именно благодаря капсуле — без неё после короткого
+     * слова оставалась «дыра» посередине предложения.
      */
-    <span className="relative inline-grid w-full text-center align-baseline md:w-auto">
+    <span className="relative inline-grid align-baseline">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -inset-y-[0.25em] rounded-full border border-[var(--border)]"
+        style={{
+          background:
+            "linear-gradient(120deg, color-mix(in oklab, var(--glow-1) 15%, transparent), color-mix(in oklab, var(--glow-3) 15%, transparent))",
+        }}
+      />
       {words.map((word, idx) => (
         <motion.span
           key={word}
           aria-hidden={idx !== i}
           initial={false}
-          animate={idx === i ? { opacity: 1, y: 0 } : { opacity: 0, y: idx === prev ? -14 : 14 }}
+          animate={idx === i ? { opacity: 1, y: 0 } : { opacity: 0, y: idx === prev ? -10 : 10 }}
           transition={{ duration: 0.45, ease: EASE }}
-          className="text-gradient col-start-1 row-start-1 font-semibold"
+          className="text-gradient col-start-1 row-start-1 justify-self-center whitespace-nowrap px-2.5 font-semibold leading-[1.1]"
         >
           {word}
         </motion.span>
@@ -60,7 +68,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] items-center pl-11 pr-5 pb-24 pt-28 sm:pl-16 sm:pr-8 sm:pt-32 lg:pl-48"
+      className="relative flex min-h-[100svh] items-center pl-12 pr-5 pb-24 pt-[calc(var(--safe-top)+7rem)] sm:pl-16 sm:pr-8 sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48"
     >
       <div className="mx-auto w-full max-w-6xl">
         <motion.div {...up(0.05)} className="pill mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-[0.75rem] font-medium tracking-wide text-[var(--muted)]">

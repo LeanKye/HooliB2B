@@ -19,12 +19,24 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  /*
+   * themeColor красит системные полосы браузера (статус-бар, панель вкладок).
+   * Раньше в тёмной теме там стоял почти чёрный #04060c — в сочетании с
+   * `viewport-fit=cover` это и давало ощущение «чёрных полос сверху и снизу».
+   * Теперь цвет совпадает с верхом авроры, и полосы сливаются с фоном сайта.
+   */
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eef2f9" },
-    { media: "(prefers-color-scheme: dark)", color: "#04060c" },
+    { media: "(prefers-color-scheme: light)", color: "#dbe3f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#2e316f" },
   ],
   width: "device-width",
   initialScale: 1,
+  /*
+   * cover — сайт занимает весь экран, включая зоны выреза камеры и домашнего
+   * индикатора. Без этого iOS отдаёт странице только «безопасный» прямоугольник,
+   * а полосы по краям закрашивает сама (в Telegram — тёмным).
+   */
+  viewportFit: "cover",
 };
 
 // Ставим тему до первой отрисовки — без «вспышки» белым.
