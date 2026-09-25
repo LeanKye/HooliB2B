@@ -44,7 +44,9 @@ components/
   providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
   sections/                        # Hero, Services, Templates, Pricing, Process, Partners, Contact
   templates/[slug]/                # подробная страница шаблона (по образцу partners/[slug])
+  templates/[slug]/preview/        # живой предпросмотр (пока только для проработанных шаблонов)
   ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon, TemplatePreview, TemplateDetails
+  templates/                       # живые предпросмотры шаблонов (LuminaPreview)
 lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, шаблоны, партнёры)
 public/.nojekyll                   # чтобы GitHub Pages не пропускал папку _next через Jekyll
 .github/workflows/deploy-pages.yml # авто-деплой на GitHub Pages

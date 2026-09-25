@@ -133,6 +133,34 @@ export default async function TemplatePage({ params }: { params: Promise<{ slug:
           </div>
         </Reveal>
 
+        {/*
+         * Предпросмотр — главная кнопка страницы. Скриншоты и макеты
+         * показывают вёрстку, а живой предпросмотр отвечает на вопрос
+         * «а как это работает»: фильтр фильтрует, форма проверяет поля,
+         * на телефоне включается бургер-меню. Ссылка ведёт на отдельную
+         * страницу, а не открывает окно, чтобы предпросмотр можно было
+         * скинуть клиенту ссылкой.
+         */}
+        {isDetailed && (
+          <Reveal delay={80}>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link
+                href={`/templates/${t.slug}/preview/`}
+                className="glass-strong inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[0.95rem] font-semibold transition-transform duration-300 hover:scale-[1.03]"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+                  <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                </svg>
+                Открыть живой предпросмотр
+              </Link>
+              <span className="text-[0.85rem] text-[var(--muted)]">
+                Можно нажать кнопки, отфильтровать работы и заполнить форму
+              </span>
+            </div>
+          </Reveal>
+        )}
+
         {/* Кому подойдёт — отвечает на главный вопрос каталога */}
         <Reveal delay={100}>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
