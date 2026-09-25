@@ -70,142 +70,183 @@
 }
 
 /* ============================ БАЗА ============================ */
-* {
-  border-color: var(--border);
-}
-
 /*
- * `scroll-behavior: smooth` тут намеренно НЕ ставится: на десктопе плавный
- * скролл делает Lenis, на тач-устройствах — нативный scrollTo({behavior}).
- * CSS-правило конфликтовало с ними и давало рывки.
+ * СНАЧАЛА ПРО СЛОИ — от них зависит, кто кого перебивает.
  *
- * Фон на самом <html> — это канвас браузера. Именно он виден в «полосах» над и
- * под страницей, когда iOS уводит вьюпорт за край (оттяжка пальцем) и вокруг
- * выреза камеры. Раньше канвас был прозрачным, а body — почти чёрным (#04060c),
- * отсюда и «чёрные полосы», в которые «уезжали» элементы. Теперь канвас
- * выкрашен в тон авроры, а оттяжка отключена вовсе.
+ * `@import "tailwindcss"` разворачивается в `@layer theme, base, components,
+ * utilities`, а по правилам каскада стили ВНЕ слоёв сильнее любого слоя:
+ * не специфичностью, а самим фактом отсутствия слоя. Пока правила ниже лежали
+ * без слоя, они молча отменяли утилиты Tailwind на тех же элементах, хотя в
+ * разметке классы расставлены верно:
+ *
+ *   `border-dashed` на карточке «стать партнёром» не давал пунктира — его
+ *   перебивал шорткат `border` из .glass;
+ *   `border-[var(--border-strong)]` на кнопках тарифов и на «пилюлях» отдавал
+ *   цвет из `* { border-color }`, то есть обычный --border вместо усиленного.
+ *
+ * Слои возвращают Tailwind привычный приоритет: base → components → utilities.
+ * Вне слоёв намеренно остались только токены тем: их значение одно на документ,
+ * спорить не о чем. Анимации и мобильные упрощения живут в components — им не
+ * нужно быть сильнее утилит, а рядом со своими классами (ниже по файлу) они и
+ * так выигрывают при равной специфичности.
  */
-html {
-  -webkit-text-size-adjust: 100%;
-  background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
-  overscroll-behavior: none;
-}
-
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  letter-spacing: -0.022em;
-  line-height: 1.04;
-  text-wrap: balance;
-}
-
-p { text-wrap: pretty; }
-
-.font-display { font-family: var(--font-display); }
-.tabular { font-variant-numeric: tabular-nums; }
-
-
-::selection {
-  background: color-mix(in oklab, var(--glow-2) 40%, transparent);
-  color: var(--fg);
-}
-
-/* Кастомный скроллбар */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--fg) 22%, transparent);
-  border-radius: 999px;
-  border: 3px solid transparent;
-  background-clip: content-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--fg) 40%, transparent);
-  background-clip: content-box;
-}
-
-@media (prefers-reduced-motion: reduce) {
+@layer base {
+  /*
+   * Цвет рамок по умолчанию. Живёт в @layer base именно для того, чтобы
+   * `border-[…]` из @layer utilities мог его переопределить.
+   */
   * {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    border-color: var(--border);
+  }
+
+  /*
+   * `scroll-behavior: smooth` тут намеренно НЕ ставится: на десктопе плавный
+   * скролл делает Lenis, на тач-устройствах — нативный scrollTo({behavior}).
+   * CSS-правило конфликтовало с ними и давало рывки.
+   *
+   * Фон на самом <html> — это канвас браузера. Именно он виден в «полосах» над и
+   * под страницей, когда iOS уводит вьюпорт за край (оттяжка пальцем) и вокруг
+   * выреза камеры. Раньше канвас был прозрачным, а body — почти чёрным (#04060c),
+   * отсюда и «чёрные полосы», в которые «уезжали» элементы. Теперь канвас
+   * выкрашен в тон авроры, а оттяжка отключена вовсе.
+   */
+  html {
+    -webkit-text-size-adjust: 100%;
+    background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
+    overscroll-behavior: none;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  ::selection {
+    background: color-mix(in oklab, var(--glow-2) 40%, transparent);
+    color: var(--fg);
+  }
+
+  /* Кастомный скроллбар */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--fg) 22%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--fg) 40%, transparent);
+    background-clip: content-box;
+  }
+
+  /*
+   * Гасим движения. `!important` внутри слоя сильнее утилит Tailwind и сильнее
+   * `!important` вне слоёв, так что обещание из README («prefers-reduced-motion
+   * уважается безусловно») держится: приоритет у доступности, а не у анимации.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
   }
 }
 
-/* ============================ LIQUID GLASS ============================ */
-.glass {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
-    var(--card);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
-  backdrop-filter: blur(18px) saturate(165%);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
+/* ============================ КОМПОНЕНТЫ ============================ */
+/*
+ * Всё ниже — @layer components: слой младше утилит, поэтому `border-dashed`,
+ * `bg-*`, `shadow-*` и `transition-*` из разметки снова главнее наших классов —
+ * ровно того от Tailwind и ждут.
+ */
+@layer components {
+  /*
+   * Текстовые классы. В components, а не в base: это «полуфабрикаты», которые
+   * утилиты (font-sans, tabular-nums) должны уметь перекрыть.
+   */
+  .font-display { font-family: var(--font-display); }
+  .tabular { font-variant-numeric: tabular-nums; }
 
-.glass-strong {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
-    var(--card-strong);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
-  backdrop-filter: blur(26px) saturate(180%);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow);
-}
+  /* ============================ LIQUID GLASS ============================ */
+  .glass {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
+      var(--card);
+    -webkit-backdrop-filter: blur(18px) saturate(165%);
+    backdrop-filter: blur(18px) saturate(165%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
 
-/* Навигационная «капсула» в стиле liquid glass */
-.glass-nav {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 48%),
-    var(--card);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--border);
-  box-shadow: 0 10px 30px -18px rgba(10, 20, 60, 0.5);
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-}
-.glass-nav:hover {
-  border-color: var(--border-strong);
-  box-shadow: 0 14px 36px -16px rgba(10, 20, 60, 0.55);
-}
-.glass-nav[data-active="true"] {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%),
-    color-mix(in oklab, var(--glow-2) 22%, var(--card));
-  border-color: color-mix(in oklab, var(--glow-2) 45%, transparent);
-  box-shadow: 0 12px 34px -14px color-mix(in oklab, var(--glow-2) 60%, transparent);
-}
+  .glass-strong {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
+      var(--card-strong);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+  }
 
-/* Компактный бейдж-«пилюля» (eyebrow над заголовком, метки «Популярный» и т.п.) */
-.pill {
-  background: var(--card);
-  -webkit-backdrop-filter: blur(12px) saturate(165%);
-  backdrop-filter: blur(12px) saturate(165%);
-}
+  /* Навигационная «капсула» в стиле liquid glass */
+  .glass-nav {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 48%),
+      var(--card);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px -18px rgba(10, 20, 60, 0.5);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .glass-nav:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 14px 36px -16px rgba(10, 20, 60, 0.55);
+  }
+  .glass-nav[data-active="true"] {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%),
+      color-mix(in oklab, var(--glow-2) 22%, var(--card));
+    border-color: color-mix(in oklab, var(--glow-2) 45%, transparent);
+    box-shadow: 0 12px 34px -14px color-mix(in oklab, var(--glow-2) 60%, transparent);
+  }
+
+  /* Компактный бейдж-«пилюля» (eyebrow над заголовком, метки «Популярный» и т.п.) */
+  .pill {
+    background: var(--card);
+    -webkit-backdrop-filter: blur(12px) saturate(165%);
+    backdrop-filter: blur(12px) saturate(165%);
+  }
 
 /* ============================ ТЕКСТ И ЭФФЕКТЫ ============================ */
 .text-gradient {
@@ -356,4 +397,4 @@ p { text-wrap: pretty; }
    */
   html.is-scrolling .animate-floaty { animation-play-state: paused; }
 }
-
+}
