@@ -16,11 +16,23 @@ const priceRows = [
 
 function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number }) {
   return (
-    <div
-      className={`glass relative flex h-full flex-col overflow-hidden rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1.5 ${
-        plan.featured ? "sm:-translate-y-3 sm:scale-[1.03]" : ""
-      }`}
-    >
+    /*
+     * Смещение «приподнятой» карточки и её hover-подскок живут на РАЗНЫХ
+     * элементах — и это не stylistic choice, а требование Tailwind v4.
+     *
+     * Утилиты translate не складываются: каждая пишет в одну и ту же переменную
+     * `--tw-translate-y` и сама объявляет `translate: var(--tw-translate-y)`.
+     * Значит `sm:-translate-y-3` и `hover:-translate-y-1.5` на одном элементе —
+     * не «-12px и ещё -6px», а «последний победил». На hover карточка
+     * «Популярный» получала -6px вместо своих -12px, то есть опускалась на
+     * 6px вместо подъёма. Остальные карточки вели себя правильно только потому,
+     * что у них `sm:-translate-y-3` не было и конфликта не возникало.
+     *
+     * На обёртке — только статичное смещение, на карточке — только hover.
+     * Трансформации вложенных элементов перемножаются, и эффекты складываются.
+     */
+    <div className={plan.featured ? "h-full sm:-translate-y-3 sm:scale-[1.03]" : "h-full"}>
+      <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1.5">
       {plan.featured && (
         <>
           <span
@@ -46,7 +58,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
           {plan.features.map((f) => (
             <li key={f} className="flex items-start gap-3 text-[0.9rem] text-[var(--muted)]">
               <svg viewBox="0 0 20 20" className="mt-[3px] h-4 w-4 shrink-0 text-[var(--glow-3)]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 10.5l4 4 8-9" />
+                <path d="M5 12.5l4 4 8-9" />
               </svg>
               {f}
             </li>
@@ -62,6 +74,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
         >
           Подключить
         </button>
+      </div>
       </div>
     </div>
   );
