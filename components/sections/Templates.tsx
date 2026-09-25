@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { templates } from "@/lib/content";
 import Section from "@/components/ui/Section";
 import Reveal from "@/components/ui/Reveal";
@@ -49,18 +50,25 @@ function TemplateCard({ t }: { t: (typeof templates)[number] }) {
           ))}
         </ul>
 
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-[var(--border)] pt-4">
-          <div>
-            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Внедрение</div>
-            <div className="font-display text-lg font-semibold tabular">{t.price}</div>
-          </div>
-          <button
-            type="button"
-            onClick={() => scrollToId("contact")}
+        {/*
+         * Цены в каталоге нет намеренно: она живёт в разделе «Цены» и зависит
+         * от состава работ, а не от шаблона. Карточка ведёт на подробную
+         * страницу шаблона — там разбор блоков и список контента от клиента.
+         */}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+          <Link
+            href={`/templates/${t.slug}/`}
+            className="text-[0.85rem] font-semibold transition-colors duration-300"
+            style={{ color: t.accent }}
+          >
+            Подробнее о шаблоне
+          </Link>
+          <Link
+            href={`/templates/${t.slug}/`}
             className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-[0.82rem] font-semibold text-[var(--fg)] transition-colors duration-300 hover:bg-[var(--card)]"
           >
-            Обсудить
-          </button>
+            Смотреть
+          </Link>
         </div>
       </div>
     </div>

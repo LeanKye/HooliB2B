@@ -43,6 +43,7 @@ components/
   providers/ThemeProvider.tsx      # тёмная/светлая тема + localStorage
   providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
   sections/                        # Hero, Services, Templates, Pricing, Process, Partners, Contact
+  templates/[slug]/                # подробная страница шаблона (по образцу partners/[slug])
   ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon, TemplatePreview
 lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, шаблоны, партнёры)
 public/.nojekyll                   # чтобы GitHub Pages не пропускал папку _next через Jekyll
@@ -54,7 +55,7 @@ public/.nojekyll                   # чтобы GitHub Pages не пропуск
 Почти всё правится в одном файле — `lib/content.ts`:
 
 - `services` — продукты, цены внедрения, список возможностей;
-- `templates` — каталог шаблонов (превью рисуется в CSS, см. `TemplatePreview.tsx`);
+- `templates` — каталог шаблонов. Поля `whoFor`, `blockNotes`, `customizes`, `needsAssets` и `shots` питают подробную страницу `/templates/[slug]/`. Превью рисуется в CSS (см. `TemplatePreview.tsx`), но `shots` подписаны подсказкой «что будет на кадре» — когда появятся скриншоты, они кладутся в `public/templates/<slug>/` и подставляются в `Shot`;
 - `plans` — тарифы подписки;
 - `process` — шаги работы;
 - `partners` — клиенты для раздела «Наши партнёры»;
