@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { metrics } from "@/lib/content";
-import { scrollToId, useCoarsePointer } from "@/components/providers/SmoothScroll";
+import { scrollToId } from "@/components/providers/SmoothScroll";
 
 const words = ["сайты", "CRM-системы", "AI-ассистентов", "интеграции"];
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
@@ -60,18 +60,22 @@ function RotatingWord() {
 
 export default function Hero() {
   /*
-   * `filter: blur()` в motion задаётся инлайном, поэтому мобильное правило
-   * `.reveal { filter: none }` из globals.css на него не действует — а именно
-   * Hero его и использует (класса `.reveal` здесь нет вообще). Blur перерисовывает
-   * текст на каждом кадре, и на телефоне от этого «дрожали» цифры в метриках
-   * («3 дня», «24/7» и т.д.). На тач-устройствах оставляем только сдвиг и прозрачность:
-   * они идут через композитор и текст не перерисовывают.
+   * Появление вверху — только сдвиг и прозрачность. Оба идут через композитор и
+   * не перерисовывают текст, поэтому одинаково дешёвы на любом устройстве.
+   *
+   * Раньше сюда входил `filter: blur(8px)`, и на телефоне от него «дрожали» цифры
+   * в метриках. Подавить его в CSS нельзя было: motion задаёт filter инлайном,
+   * а значит правило `.reveal { filter: none }` (класс `.reveal` здесь не
+   * используется) на него не действует. Пытаться решить это в JS через
+   * `useCoarsePointer()` тоже нельзя: хук возвращает `false` на первом рендере
+   * и уточняет значение в useEffect, то есть `filter` исчезает из цели анимации
+   * уже на лету — motion оставляет последний записанный инлайн-стиль, и blur
+   * зависает на экране навсегда. Поэтому дорогая часть просто убрана, а не
+   * conditionally отключена.
    */
-  const coarse = useCoarsePointer();
-
   const up = (delay: number) => ({
-    initial: coarse ? { opacity: 0, y: 26 } : { opacity: 0, y: 26, filter: "blur(8px)" },
-    animate: coarse ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, filter: "blur(0px)" },
+    initial: { opacity: 0, y: 26 },
+    animate: { opacity: 1, y: 0 },
     transition: { duration: 0.9, delay, ease: EASE },
   });
 

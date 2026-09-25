@@ -41,7 +41,7 @@ app/
 components/
   background/AuroraBackground.tsx  # живой фон (canvas + параллакс от мыши)
   providers/ThemeProvider.tsx      # тёмная/светлая тема + localStorage
-  providers/SmoothScroll.tsx       # MotionConfig + scrollToId() + useCoarsePointer()
+  providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
   ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon
   sections/                        # Hero, Services, Pricing, Process, Partners, Team, Contact
 lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, партнёры, команда)
