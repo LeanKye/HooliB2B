@@ -44,7 +44,7 @@ components/
   providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
   sections/                        # Hero, Services, Templates, Pricing, Process, Partners, Contact
   templates/[slug]/                # подробная страница шаблона (по образцу partners/[slug])
-  ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon, TemplatePreview
+  ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon, TemplatePreview, TemplateDetails
 lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, шаблоны, партнёры)
 public/.nojekyll                   # чтобы GitHub Pages не пропускал папку _next через Jekyll
 .github/workflows/deploy-pages.yml # авто-деплой на GitHub Pages
@@ -55,7 +55,7 @@ public/.nojekyll                   # чтобы GitHub Pages не пропуск
 Почти всё правится в одном файле — `lib/content.ts`:
 
 - `services` — продукты, цены внедрения, список возможностей;
-- `templates` — каталог шаблонов. Поля `whoFor`, `blockNotes`, `customizes`, `needsAssets` и `shots` питают подробную страницу `/templates/[slug]/`. Превью рисуется в CSS (см. `TemplatePreview.tsx`), но `shots` подписаны подсказкой «что будет на кадре» — когда появятся скриншоты, они кладутся в `public/templates/<slug>/` и подставляются в `Shot`;
+- `templates` — каталог шаблонов. Поля `whoFor`, `blockNotes`, `customizes`, `needsAssets` и `shots` питают подробную страницу `/templates/[slug]/`. Флаг `detailed: true` включает разбор экранов в макетах вместо схем — так прорабатывается первый шаблон (Lumina), остальные показывают общую схему. `TemplateDetails.tsx` содержит `TemplateMockup` (четыре варианта экрана) и `TemplateFlex` (что меняется, а что фиксировано);
 - `plans` — тарифы подписки;
 - `process` — шаги работы;
 - `partners` — клиенты для раздела «Наши партнёры»;

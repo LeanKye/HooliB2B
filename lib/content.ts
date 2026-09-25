@@ -189,6 +189,8 @@ export type Template = {
   /** Плейсхолдеры скриншотов: подпись + что должно быть на кадре. */
   shots: { caption: string; hint: string }[];
   accent: string;
+  /** Подробные макеты экранов: ставим у первого проработанного шаблона. */
+  detailed?: boolean;
   /** Оттенки для CSS-макета превью: [фон, акцент, третий] */
   preview: [string, string, string];
 };
@@ -223,6 +225,7 @@ export const templates: Template[] = [
       { caption: "Прайс", hint: "Три пакета услуг карточками, у среднего — бейдж «популярный»" },
     ],
     accent: "#f472b6",
+    detailed: true,
     preview: ["#2a1b2e", "#f472b6", "#fbbf24"],
   },
   {

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { templates } from "@/lib/content";
 import Reveal from "@/components/ui/Reveal";
 import TemplatePreview from "@/components/ui/TemplatePreview";
+import TemplateMockup, { TemplateFlex } from "@/components/ui/TemplateDetails";
 
 export function generateStaticParams() {
   return templates.map((t) => ({ slug: t.slug }));
@@ -52,12 +53,36 @@ function Shot({
   );
 }
 
+/** Подпись под макетом экрана: что это и на что смотреть. */
+function Figure({
+  caption,
+  hint,
+  children,
+}: {
+  caption: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <figure className="glass overflow-hidden rounded-3xl p-3">
+      <div className="overflow-hidden rounded-2xl">{children}</div>
+      <figcaption className="px-1 pt-4">
+        <div className="text-[0.95rem] font-semibold">{caption}</div>
+        <p className="mt-1 text-[0.85rem] leading-relaxed text-[var(--muted)]">{hint}</p>
+      </figcaption>
+    </figure>
+  );
+}
+
 export default async function TemplatePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const t = templates.find((x) => x.slug === slug);
   if (!t) notFound();
 
   const isFull = t.kind === "full";
+  // Подробные макеты экранов делаем по одному шаблону: детальная проработка
+  // занимает много текста, а показывать её везде одинаково незачем.
+  const isDetailed = t.detailed === true;
 
   return (
     <main className="relative pb-[calc(var(--safe-bottom)+5rem)] pl-[calc(var(--safe-left)+1.25rem)] pr-[calc(var(--safe-right)+1.25rem)] pt-[calc(var(--safe-top)+7rem)] sm:pl-[calc(var(--safe-left)+2rem)] sm:pr-[calc(var(--safe-right)+2rem)] sm:pt-[calc(var(--safe-top)+8rem)] lg:pl-48">
@@ -156,19 +181,68 @@ export default async function TemplatePage({ params }: { params: Promise<{ slug:
           </div>
         </Reveal>
 
-        {/* Превью экранов — плейсхолдеры под реальные скриншоты */}
-        <Reveal delay={180}>
+        {/*
+         * Экраны шаблона. Для разработанного шаблона (isDetailed) показываем
+         * полноценные макеты вблизи к натуральной величине — с кнопками,
+         * полями формы и подписью «будет ваше фото» там, где клиент
+         * подставит свой контент. Для остальных остаётся общая схема.
+         */}
+        {isDetailed ? (
+          <Reveal delay={180}>
+            <div className="mt-6">
+              <h2 className="text-[1.35rem] font-semibold">Экраны шаблона</h2>
+              <p className="mt-2 max-w-3xl text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                Это разбор вёрстки: видно, где стоят заголовки, кнопки и фотографии.
+                Надписи «ваше фото» — не украшение, а честная пометка: почти каждая
+                картинка меняется на материалы клиента. Цвета, шрифты и графика
+                подбираются под бренд, поэтому точный вид каждого экрана
+                складывается уже вместе с вами.
+              </p>
+
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <Figure caption="Первый экран" hint="Заголовок, фото на всю ширину и две кнопки: в шапке «Записаться», на фото — «Смотреть работы». Место кнопок не двигаем, меняем текст.">
+                  <TemplateMockup t={t} variant="hero" />
+                </Figure>
+                <Figure caption="Портфолио" hint="Сетка работ с фильтром по категориям. Категории и снимки — ваши, мы только настраиваем сетку и лёгкое увеличение по клику.">
+                  <TemplateMockup t={t} variant="gallery" />
+                </Figure>
+                <Figure caption="Услуги и цены" hint="Три пакета карточками, средний выделен бейджем и поднят. Состав пакетов и цены — полностью ваши.">
+                  <TemplateMockup t={t} variant="price" />
+                </Figure>
+                <Figure caption="Заявка и отзывы" hint="Отзывы держим рядом с формой: человек читает чужой опыт и только потом оставляет заявку. Поля формы настраиваем под вас.">
+                  <TemplateMockup t={t} variant="form" />
+                </Figure>
+              </div>
+            </div>
+          </Reveal>
+        ) : (
+          <Reveal delay={180}>
+            <div className="mt-6">
+              <h2 className="text-[1.35rem] font-semibold">Как выглядит</h2>
+              <p className="mt-2 max-w-3xl text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                Сейчас здесь схемы: они показывают структуру экрана, а не финальный дизайн.
+                Точные цвета, шрифты и графика всегда подбираются под бренд клиента — именно
+                поэтому показать «как будет» заранее нельзя, можно показать структуру.
+              </p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {t.shots.map((s) => (
+                  <Shot key={s.caption} shot={s} t={t} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Граница настраиваемого: почти всё меняется, фиксирована механика */}
+        <Reveal delay={220}>
           <div className="mt-6">
-            <h2 className="text-[1.35rem] font-semibold">Как выглядит</h2>
+            <h2 className="text-[1.35rem] font-semibold">Что можно менять</h2>
             <p className="mt-2 max-w-3xl text-[0.92rem] leading-relaxed text-[var(--muted)]">
-              Сейчас здесь схемы: они показывают структуру экрана, а не финальный дизайн.
-              Точные цвета, шрифты и графика всегда подбираются под бренд клиента — именно
-              поэтому показать «как будет» заранее нельзя, можно показать структуру.
+              Шаблон — это заготовка под задачу, а не готовый сайт, который нельзя
+              трогать. Настраивается практически всё, что видит посетитель.
             </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {t.shots.map((s) => (
-                <Shot key={s.caption} shot={s} t={t} />
-              ))}
+            <div className="mt-5">
+              <TemplateFlex />
             </div>
           </div>
         </Reveal>
