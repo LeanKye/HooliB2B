@@ -5,13 +5,25 @@ import Section from "@/components/ui/Section";
 import Reveal from "@/components/ui/Reveal";
 import { scrollToId } from "@/components/providers/SmoothScroll";
 
+/*
+ * Только разовые цены за внедрение.
+ *
+ * Колонки «Подписка» здесь больше нет намеренно. Раньше она стояла рядом с
+ * ценой продукта, и таблица читалась так: «купили CRM — обязаны взять подписку
+ * 10 000 ₽/мес». На деле это неправда и по цифрам, и по смыслу: подписка
+ * выбирается отдельно (тарифы «Базовый / Стандарт / Премиум» выше), и у
+ * тарифа нет привязки к продукту. Прежние значения колонки к тому же
+ * противоречили тарифам: для CRM колонка показывала 10 000 ₽/мес, хотя
+ * «Премиум» стоит 15 000 ₽/мес, то есть таблица ограничивала выбор клиента
+ * несуществующим правилом.
+ */
 const priceRows = [
-  { name: "Сайт-визитка", template: "25 000 ₽", custom: "60 000 ₽", sub: "3 000 ₽/мес" },
-  { name: "Полноценный сайт", template: "60 000 ₽", custom: "150 000 ₽", sub: "7 000 ₽/мес" },
-  { name: "CRM-система", template: "80 000 ₽", custom: "200 000 ₽", sub: "10 000 ₽/мес" },
-  { name: "AI-ассистент", template: "70 000 ₽", custom: "180 000 ₽", sub: "12 000 ₽/мес" },
-  { name: "Комбо-пакет (сайт + CRM + AI)", template: "180 000 ₽", custom: "450 000 ₽", sub: "25 000 ₽/мес" },
-  { name: "Индивидуальная разработка", template: "—", custom: "от 300 000 ₽", sub: "по проекту" },
+  { name: "Сайт-визитка", template: "25 000 ₽", custom: "60 000 ₽" },
+  { name: "Полноценный сайт", template: "60 000 ₽", custom: "150 000 ₽" },
+  { name: "CRM-система", template: "80 000 ₽", custom: "200 000 ₽" },
+  { name: "AI-ассистент", template: "70 000 ₽", custom: "180 000 ₽" },
+  { name: "Комбо-пакет (сайт + CRM + AI)", template: "180 000 ₽", custom: "450 000 ₽" },
+  { name: "Индивидуальная разработка", template: "—", custom: "от 300 000 ₽" },
 ];
 
 function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number }) {
@@ -98,20 +110,26 @@ export default function Pricing() {
 
       <Reveal delay={120}>
         <div className="glass mt-8 overflow-hidden rounded-3xl">
-          <div className="hidden grid-cols-[1.7fr_1fr_1fr_1fr] gap-4 border-b border-[var(--border)] px-6 py-4 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)] sm:grid">
+          <div className="border-b border-[var(--border)] px-5 py-4 sm:px-6">
+            <h3 className="text-lg font-semibold">Стоимость внедрения</h3>
+            <p className="mt-1 text-[0.88rem] text-[var(--muted)]">
+              Разовая оплата за сам продукт. Подписка на сопровождение — отдельный
+              выбор, см. тарифы выше.
+            </p>
+          </div>
+          <div className="hidden grid-cols-[1.7fr_1fr_1fr] gap-4 border-b border-[var(--border)] px-6 py-4 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)] sm:grid">
             <span>Продукт</span>
             <span className="text-right">Внедрение (шаблон)</span>
             <span className="text-right">Разработка с нуля</span>
-            <span className="text-right">Подписка</span>
           </div>
           {priceRows.map((r, i) => (
             <div
               key={r.name}
-              className={`grid grid-cols-3 gap-x-3 gap-y-2 px-5 py-5 transition-colors duration-300 hover:bg-[var(--card)] sm:grid-cols-[1.7fr_1fr_1fr_1fr] sm:items-center sm:gap-4 sm:px-6 ${
+              className={`grid grid-cols-2 gap-x-3 gap-y-2 px-5 py-5 transition-colors duration-300 hover:bg-[var(--card)] sm:grid-cols-[1.7fr_1fr_1fr] sm:items-center sm:gap-4 sm:px-6 ${
                 i > 0 ? "border-t border-[var(--border)]" : ""
               }`}
             >
-              <span className="col-span-3 font-medium sm:col-span-1">{r.name}</span>
+              <span className="col-span-2 font-medium sm:col-span-1">{r.name}</span>
               <span className="text-left sm:text-right">
                 <span className="block text-[0.62rem] uppercase tracking-wider text-[var(--muted)] sm:hidden">Шаблон</span>
                 <span className="tabular text-[0.92rem]">{r.template}</span>
@@ -119,10 +137,6 @@ export default function Pricing() {
               <span className="text-left sm:text-right">
                 <span className="block text-[0.62rem] uppercase tracking-wider text-[var(--muted)] sm:hidden">С нуля</span>
                 <span className="tabular text-[0.92rem]">{r.custom}</span>
-              </span>
-              <span className="text-left sm:text-right">
-                <span className="block text-[0.62rem] uppercase tracking-wider text-[var(--muted)] sm:hidden">Подписка</span>
-                <span className="tabular text-[0.92rem] text-[var(--muted)]">{r.sub}</span>
               </span>
             </div>
           ))}

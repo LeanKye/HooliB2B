@@ -88,15 +88,25 @@ function ServiceCard({ s }: { s: Service }) {
           ))}
         </ul>
 
+        {/*
+         * Подписка здесь больше не показывается.
+         *
+         * Раньше в подвале карточки стояло «Внедрение 25 000 ₽» и «Подписка
+         * 3 000 ₽/мес» рядом, и это читалось как обязательная связка: мол,
+         * заказываешь «Сайт-визитку» — подписка именно 3 000 ₽/мес. На деле
+         * подписка выбирается отдельно (тарифы «Базовый / Стандарт / Премиум»
+         * в блоке «Цены»), и её стоимость не зависит от продукта. Значения
+         * к тому же расходились с тарифами: здесь для CRM стояло 10 000 ₽/мес,
+         * а «Премиум» — 15 000 ₽/мес.
+         *
+         * Оставляем только разовую цену внедрения — её выбор действительно
+         * определяется продуктом.
+         */}
         <div className="mt-auto flex items-end justify-between gap-4 border-t border-[var(--border)] pt-5">
           <div>
-            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Внедрение</div>
-            <div className="font-display text-lg font-semibold tabular">{s.setupFrom}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Подписка</div>
+            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Внедрение от</div>
             <div className="font-display text-lg font-semibold tabular" style={{ color: s.accent }}>
-              {s.subFrom}
+              {s.setupFrom}
             </div>
           </div>
         </div>
