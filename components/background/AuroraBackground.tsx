@@ -126,7 +126,22 @@ export default function AuroraBackground() {
       }
     };
 
-    const step = 1000 / (coarse ? 30 : 60) - 1;
+    /*
+     * Живой ли фон вообще. На тач-устройствах и при prefers-reduced-motion
+     * рисуем ОДИН статичный кадр и не заводим rAF-цикл: под пальцем «светлячки»
+     * и параллакс всё равно не читаются, а постоянная перерисовка полноэкранного
+     * canvas — это нагрев и расход батареи. На десктопе цикл живёт, но на время
+     * прокрутки замирает (см. onScroll): весь бюджет кадра отдаём скроллу.
+     */
+    const live = !reduce && !coarse;
+
+    /*
+     * Потолок canvas — 60 fps. Частицы это мягкий фон, а не содержимое кадра:
+     * рисовать полноэкранный canvas на ProMotion (120 Гц) дороже, чем даёт
+     * видимый выигрыш, и отъедает бюджет кадра у прокрутки. Плавность скролла
+     * обеспечивается не частотой фона, а его остановкой на время скролла.
+     */
+    const step = 1000 / 60 - 1;
     let raf = 0;
     let last = 0;
     let visible = true;
@@ -167,7 +182,7 @@ export default function AuroraBackground() {
 
     const onVis = () => {
       visible = !document.hidden;
-      if (visible && !raf) raf = requestAnimationFrame(frame);
+      if (live && visible && !raf) raf = requestAnimationFrame(frame);
     };
 
     const onScroll = () => {
@@ -180,7 +195,9 @@ export default function AuroraBackground() {
       scrollTimer = window.setTimeout(() => {
         scrolling = false;
         document.documentElement.classList.remove("is-scrolling");
-        if (!raf && visible) raf = requestAnimationFrame(frame);
+        // Только если фон живой: на тач-устройствах цикла нет, и его нельзя
+        // запускать отсюда — иначе фоновый rAF проснулся бы на 30 fps.
+        if (live && !raf && visible) raf = requestAnimationFrame(frame);
       }, 140);
     };
 
@@ -188,24 +205,39 @@ export default function AuroraBackground() {
     // а один раз после того, как размер устоялся.
     const onResize = () => {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(build, 160);
+      resizeTimer = window.setTimeout(() => {
+        build();
+        // Смена размера обнуляет canvas. На живом фоне следующий кадр
+        // перерисует его сам, а на статичном цикла нет — рисуем здесь.
+        if (!live) draw();
+      }, 160);
     };
 
     build();
     window.addEventListener("resize", onResize);
 
-    if (reduce) {
-      // Пользователь просил меньше движения — рисуем один статичный кадр.
-      draw();
-    } else {
-      if (coarse) {
-        window.addEventListener("scroll", onScroll, { passive: true });
-      } else {
-        window.addEventListener("pointermove", onMove, { passive: true });
-        window.addEventListener("pointerleave", onLeave);
-      }
+    /*
+     * Скролл слушаем ВСЕГДА, независимо от типа ввода.
+     *
+     * Раньше обработчик вешался только при `coarse`, то есть на тач-устройствах.
+     * На десктопе с трекпадом отсюда не вызывался ни разу, а значит не
+     * выставлялся `is-scrolling` и фон не замирал: canvas продолжал перерисовываться
+     * и пятна «дышали» прямо во время прокрутки. Под каждым `backdrop-filter` карточек
+     * фон менялся каждый кадр, размытие пересчитывалось непрерывно, и на ProMotion
+     * (120 Гц, бюджет кадра 8.3 мс) скролл просаживался до 60.
+     */
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    if (live) {
+      window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerleave", onLeave);
       document.addEventListener("visibilitychange", onVis);
       raf = requestAnimationFrame(frame);
+    } else {
+      // Тач-устройство или prefers-reduced-motion: один статичный кадр, без цикла.
+      // Частицы под пальцем не читаются, а 30 fps полноэкранного canvas — это
+      // нагрев и батарея. Слушатель скролла выше остаётся: он гасит «дыхание» пятен.
+      draw();
     }
 
     return () => {

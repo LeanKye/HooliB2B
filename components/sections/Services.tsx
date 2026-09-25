@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { services } from "@/lib/content";
 import Section from "@/components/ui/Section";
 import Reveal from "@/components/ui/Reveal";
@@ -10,14 +10,38 @@ type Service = (typeof services)[number];
 
 function ServiceCard({ s }: { s: Service }) {
   const ref = useRef<HTMLDivElement>(null);
+  /*
+   * Подсветка следует за курсором через --cx/--cy. Событие мыши приходит
+   * чаще, чем браузер рисует кадр (до 1000+ Гц на трекпадах), а setProperty
+   * инвалидирует стиль карточки. Поэтому запоминаем позицию и пишем её
+   * не чаще одного раза в кадр.
+   */
+  const pending = useRef<{ x: number; y: number } | null>(null);
+  const queued = useRef(0);
 
   const onMove = (e: React.MouseEvent) => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    el.style.setProperty("--cx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--cy", `${e.clientY - r.top}px`);
+    pending.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    if (queued.current) return;
+    queued.current = requestAnimationFrame(() => {
+      queued.current = 0;
+      const p = pending.current;
+      const node = ref.current;
+      if (!p || !node) return;
+      node.style.setProperty("--cx", `${p.x}px`);
+      node.style.setProperty("--cy", `${p.y}px`);
+    });
   };
+
+  // Отменяем отложенную запись, если карточка размонтировалась раньше кадра.
+  useEffect(
+    () => () => {
+      if (queued.current) cancelAnimationFrame(queued.current);
+    },
+    [],
+  );
 
   return (
     <div
