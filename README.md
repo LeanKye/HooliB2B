@@ -43,8 +43,8 @@ components/
   providers/ThemeProvider.tsx      # тёмная/светлая тема + localStorage
   providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
   ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon
-  sections/                        # Hero, Services, Pricing, Process, Partners, Team, Contact
-lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, партнёры, команда)
+  sections/                        # Hero, Services, Pricing, Process, Partners, Contact
+lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, партнёры)
 public/.nojekyll                   # чтобы GitHub Pages не пропускал папку _next через Jekyll
 .github/workflows/deploy-pages.yml # авто-деплой на GitHub Pages
 ```
@@ -53,11 +53,10 @@ public/.nojekyll                   # чтобы GitHub Pages не пропуск
 
 Почти всё правится в одном файле — `lib/content.ts`:
 
-- `services` — продукты, цены внедрения и подписки, список возможностей;
+- `services` — продукты, цены внедрения, список возможностей;
 - `plans` — тарифы подписки;
 - `process` — шаги работы;
 - `partners` — клиенты для раздела «Наши партнёры»;
-- `team` — команда;
 - `metrics` — цифры в первом экране;
 - `navItems` — пункты боковой навигации (id должны совпадать с `id` секций).
 
@@ -115,7 +114,7 @@ cd /tmp/pagesroot && python3 -m http.server 4321
      выглядит подменой слова. Края окна растворяет маска `mask-image` — соседнее
      название показывается и растаивает. Ширину окна задаёт невидимый дублёр со
      всеми названиями сразу: она равна самому длинному из них, поэтому на слове
-     «Команда» плашка не «дышит». Нажатие открывает список всех разделов.
+     «Партнёры» плашка не «дышит». Нажатие открывает список всех разделов.
   2. Нижний лист (bottom sheet) со всеми разделами и отметкой «сейчас» —
      удобно дотянуться большим пальцем.
   Столбика точек слева больше нет: он занимал край экрана и дублировал то, что
