@@ -42,9 +42,9 @@ components/
   background/AuroraBackground.tsx  # живой фон (canvas + параллакс от мыши)
   providers/ThemeProvider.tsx      # тёмная/светлая тема + localStorage
   providers/SmoothScroll.tsx       # MotionConfig + scrollToId()
-  ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon
-  sections/                        # Hero, Services, Pricing, Process, Partners, Contact
-lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, партнёры)
+  sections/                        # Hero, Services, Templates, Pricing, Process, Partners, Contact
+  ui/                              # Logo, SideNav, ThemeToggle, Reveal, Section, ServiceIcon, TemplatePreview
+lib/content.ts                     # ВЕСЬ контент сайта (цены, услуги, шаблоны, партнёры)
 public/.nojekyll                   # чтобы GitHub Pages не пропускал папку _next через Jekyll
 .github/workflows/deploy-pages.yml # авто-деплой на GitHub Pages
 ```
@@ -54,6 +54,7 @@ public/.nojekyll                   # чтобы GitHub Pages не пропуск
 Почти всё правится в одном файле — `lib/content.ts`:
 
 - `services` — продукты, цены внедрения, список возможностей;
+- `templates` — каталог шаблонов (превью рисуется в CSS, см. `TemplatePreview.tsx`);
 - `plans` — тарифы подписки;
 - `process` — шаги работы;
 - `partners` — клиенты для раздела «Наши партнёры»;

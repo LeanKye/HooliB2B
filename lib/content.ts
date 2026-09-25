@@ -169,6 +169,95 @@ export const partners: Partner[] = [
   },
 ];
 
+export type Template = {
+  slug: string;
+  name: string;
+  kind: "card" | "full"; // визитка или полноценный сайт
+  industry: string;
+  summary: string;
+  /** Короткий перечень блоков — что уже есть в шаблоне до кастомизации. */
+  blocks: string[];
+  price: string;
+  accent: string;
+  /** Оттенки для CSS-макета превью: [фон, акцент, третий] */
+  preview: [string, string, string];
+};
+
+export const templates: Template[] = [
+  {
+    slug: "lumina-wedding",
+    name: "Lumina",
+    kind: "full",
+    industry: "Свадебная студия",
+    summary:
+      "Портфолио с галереей, страницы услуг и форма заявки. Подходит фотографам, стилистам и ведущим.",
+    blocks: ["Галерея работ", "Услуги и цены", "Отзывы", "Форма заявки"],
+    price: "60 000 ₽",
+    accent: "#f472b6",
+    preview: ["#2a1b2e", "#f472b6", "#fbbf24"],
+  },
+  {
+    slug: "medic-clinic",
+    name: "МедПлюс",
+    kind: "card",
+    industry: "Медицинский центр",
+    summary:
+      "Страница услуг с ценами, онлайн-запись и блок врачей. Собирает заявки с утра до вечера.",
+    blocks: ["Список услуг", "Врачи", "Онлайн-запись", "FAQ"],
+    price: "25 000 ₽",
+    accent: "#38bdf8",
+    preview: ["#0f2740", "#38bdf8", "#34d399"],
+  },
+  {
+    slug: "nordic-dent",
+    name: "Nordic",
+    kind: "card",
+    industry: "Стоматология",
+    summary:
+      "Спокойный одностраничник: услуги, цены, форма заявки и карта. Минимум текста, максимум заявок.",
+    blocks: ["Услуги", "Цены", "Форма заявки", "Карта"],
+    price: "25 000 ₽",
+    accent: "#34d399",
+    preview: ["#0d2a26", "#34d399", "#a3e635"],
+  },
+  {
+    slug: "atelier-bakery",
+    name: "Ателье",
+    kind: "card",
+    industry: "Пекарня / кофейня",
+    summary:
+      "Витрина с каталогом, акциями и быстрым заказом. Заточена под мобильный трафик.",
+    blocks: ["Каталог", "Акции", "Заказ", "Отзывы"],
+    price: "25 000 ₽",
+    accent: "#fbbf24",
+    preview: ["#33240f", "#fbbf24", "#f472b6"],
+  },
+  {
+    slug: "gadget-store",
+    name: "Гаджет",
+    kind: "full",
+    industry: "Электроника",
+    summary:
+      "Каталог с фильтрами, карточки товаров, корзина и оплата онлайн. Готов к запуску продаж.",
+    blocks: ["Каталог с фильтрами", "Карточка товара", "Корзина", "Онлайн-оплата"],
+    price: "60 000 ₽",
+    accent: "#818cf8",
+    preview: ["#181c3a", "#818cf8", "#22d3ee"],
+  },
+  {
+    slug: "law-office",
+    name: "Право",
+    kind: "card",
+    industry: "Юридические услуги",
+    summary:
+      "Сдержанный сайт с услугами, практиками и формой консультации. Доверительный тон без лишнего.",
+    blocks: ["Услуги", "Практики", "Кейсы", "Консультация"],
+    price: "25 000 ₽",
+    accent: "#a78bfa",
+    preview: ["#1e1b33", "#a78bfa", "#38bdf8"],
+  },
+];
+
 export const metrics = [
   { value: "3 дня", label: "средний срок запуска сайта" },
   { value: "2–3×", label: "дешевле разработки с нуля" },
@@ -179,6 +268,7 @@ export const metrics = [
 export const navItems = [
   { id: "hero", label: "Главная" },
   { id: "services", label: "Услуги" },
+  { id: "templates", label: "Шаблоны" },
   { id: "pricing", label: "Тарифы" },
   { id: "process", label: "Процесс" },
   { id: "partners", label: "Партнёры" },
