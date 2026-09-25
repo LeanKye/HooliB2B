@@ -100,9 +100,10 @@
   }
 
   /*
-   * `scroll-behavior: smooth` тут намеренно НЕ ставится: на десктопе плавный
-   * скролл делает Lenis, на тач-устройствах — нативный scrollTo({behavior}).
-   * CSS-правило конфликтовало с ними и давало рывки.
+   * `scroll-behavior: smooth` тут намеренно НЕ ставится. Нативный скролл
+   * трекпада и так плавный, а CSS-правило конфликтовало с Lenis (он больше не
+   * используется) и давало рывки. Программные переходы к секциям идут через
+   * `scrollIntoView({ behavior: "smooth" })` — точечно и без конфликтов.
    *
    * Фон на самом <html> — это канвас браузера. Именно он виден в «полосах» над и
    * под страницей, когда iOS уводит вьюпорт за край (оттяжка пальцем) и вокруг
@@ -114,15 +115,6 @@
     -webkit-text-size-adjust: 100%;
     background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
     overscroll-behavior: none;
-  }
-
-  html.lenis,
-  html.lenis body {
-    height: auto;
-  }
-
-  .lenis.lenis-smooth {
-    scroll-behavior: auto !important;
   }
 
   body {

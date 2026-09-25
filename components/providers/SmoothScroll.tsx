@@ -1,72 +1,54 @@
 "use client";
 
-import { useEffect } from "react";
-import Lenis from "lenis";
+import { useEffect, useState } from "react";
 import { MotionConfig } from "motion/react";
 
-/** Телефон или планшет — устройство без курсора. */
-function isCoarse() {
-  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
-}
-
 /**
- * Плавный анимированный скролл (Lenis, ~3 КБ).
+ * Плавный скролл — нативный, без сторонних библиотек.
  *
- * Включаем его только там, где есть колесо или трекпад. На тач-устройствах Lenis
- * бесполезен — тач-скролл он не перехватывает (syncTouch по умолчанию выключен),
- * зато держит постоянный rAF-цикл и переопределяет scroll-behavior, из-за чего
- * прокрутка на Android ощущалась рваной. Там отдаём скролл браузеру.
+ * Раньше здесь стоял Lenis: он перехватывал колесо и двигал `scrollTop` из
+ * requestAnimationFrame. Это означало, что скролл выполнялся на main thread,
+ * а не композитором, и на ProMotion (120 Гц, бюджет кадра 8.3 мс) страница
+ * просаживалась до 60 — плюс лишние ~3 КБ и свой цикл кадра. Нативный скролл
+ * на трекпаде и так плавный, а `scroll-behavior: smooth` в CSS намеренно не
+ * ставим: он конфликтует с Lenis (которого больше нет) и давал рывки.
+ *
+ * Осталось только `MotionConfig`: он нужен, чтобы motion-анимации (смена слова
+ * в герое, пружина барабана в навигации) уважали prefers-reduced-motion.
  */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || isCoarse()) return;
-
-    const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      wheelMultiplier: 1,
-    });
-
-    let raf = 0;
-    const loop = (time: number) => {
-      lenis.raf(time);
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-
-    // Прокидываем экземпляр наружу, чтобы кнопки навигации умели плавно скроллить.
-    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
-
-    return () => {
-      cancelAnimationFrame(raf);
-      lenis.destroy();
-      delete (window as unknown as { __lenis?: Lenis }).__lenis;
-    };
-  }, []);
-
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 }
 
-/** Плавный скролл к секции по id — используется навигацией. */
+/** Плавный скролл к секции по id — используется навигацией и кнопками. */
 export function scrollToId(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
   /*
-   * Отступ считаем числом, а не константой: сверху на телефоне висит плашка
-   * «где я» (её низ и берём за ориентир) плюс вырез камеры. Раньше отступ был
-   * жёстко 76px и после подключения viewport-fit=cover заголовок раздела
-   * оказался бы под вырезом.
+   * Отступ задаёт сам `scroll-mt-24` на секции (96 px) — этого хватает и под
+   * плашку «где я» на телефоне, и под десктопную навигацию. Раньше offset
+   * считался вручную, потому что Lenis понимает только координаты.
    */
-  const pill = document.querySelector<HTMLElement>("[data-nav-pill]");
-  const offset = isCoarse() ? (pill ? pill.getBoundingClientRect().bottom + 16 : 76) : 24;
-  const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - offset);
-  const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-  if (lenis) {
-    lenis.scrollTo(y, { duration: 1.2 });
-    return;
-  }
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" });
+  el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
+/**
+ * Устройство без курсора — по нему решаем, можно ли анимировать дорогие эффекты.
+ *
+ * Нужен там, где CSS-медиазапрос не достаёт: `filter: blur()` в анимациях motion
+ * задаётся инлайном, и мобильное правило `.reveal { filter: none }` на него не
+ * действует. Blur перерисовывает текст на каждом кадре — на телефоне от этого
+ * «дрожат» цифры в первом экране.
+ */
+export function useCoarsePointer() {
+  const [coarse, setCoarse] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+    setCoarse(mq.matches);
+    const onChange = () => setCoarse(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return coarse;
 }
