@@ -382,6 +382,7 @@ export const templates: Template[] = [
       { caption: "Форма консультации", hint: "Поля: тема, имя, телефон, удобное время" },
     ],
     accent: "#a78bfa",
+    detailed: true,
     preview: ["#1e1b33", "#a78bfa", "#38bdf8"],
   },
 ];

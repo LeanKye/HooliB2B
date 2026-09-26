@@ -6,6 +6,7 @@ import Reveal from "@/components/ui/Reveal";
 import TemplatePreview from "@/components/ui/TemplatePreview";
 import { TemplateFlex } from "@/components/ui/TemplateDetails";
 import { AtelierScreen } from "@/components/templates/AtelierScreens";
+import { LawScreen } from "@/components/templates/LawScreens";
 import { LuminaScreen } from "@/components/templates/LuminaScreens";
 
 export function generateStaticParams() {
@@ -137,6 +138,32 @@ const SCREENS: Record<string, Screen[]> = {
       caption: "Отзывы",
       hint: "Отзывы с площадок-агрегаторов или из ваших соцсетей. Для маленького бренда доверие решает больше, чем дизайн.",
       render: () => <AtelierScreen variant="reviews" />,
+    },
+  ],
+  "law-office": [
+    {
+      variant: "hero",
+      caption: "Первый экран",
+      hint: "Тон, имя и цифры опыта вместо обещаний. Портрет юриста здесь обязателен: дело ведёт конкретный человек, и клиент хочет его видеть.",
+      render: () => <LawScreen variant="hero" />,
+    },
+    {
+      variant: "services",
+      caption: "Услуги и практики",
+      hint: "Направления практики с составом работ и ценой. Фильтр нужен, чтобы клиент сразу нашёл своё дело, а не листал всё подряд.",
+      render: () => <LawScreen variant="services" />,
+    },
+    {
+      variant: "cases",
+      caption: "Кейсы",
+      hint: "Разобранные ситуации без данных клиентов: было, что сделали, чем закончилось. Кейсы из вашей практики — главный аргумент.",
+      render: () => <LawScreen variant="cases" />,
+    },
+    {
+      variant: "request",
+      caption: "Консультация",
+      hint: "Тема обращения и удобное время звонка выбираются кнопками: клиент уже знает, с чем пришёл, и не должен это формулировать.",
+      render: () => <LawScreen variant="request" />,
     },
   ],
 };

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AtelierCardPreview } from "./AtelierScreens";
+import { LawCardPreview } from "./LawScreens";
 import { LuminaCardPreview } from "./LuminaScreens";
 
 /**
@@ -13,6 +14,7 @@ import { LuminaCardPreview } from "./LuminaScreens";
 const CARD_PREVIEWS: Record<string, (props: { className?: string }) => ReactNode> = {
   "lumina-wedding": (props) => <LuminaCardPreview {...props} />,
   "atelier-bakery": (props) => <AtelierCardPreview {...props} />,
+  "law-office": (props) => <LawCardPreview {...props} />,
 };
 
 /** Есть ли у шаблона настоящее превью вместо схемы. */

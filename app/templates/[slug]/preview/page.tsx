@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { templates } from "@/lib/content";
 import AtelierPreview from "@/components/templates/AtelierPreview";
+import LawPreview from "@/components/templates/LawPreview";
 import LuminaPreview from "@/components/templates/LuminaPreview";
 
 /**
@@ -13,6 +14,7 @@ import LuminaPreview from "@/components/templates/LuminaPreview";
 const LIVE_PREVIEWS: Record<string, () => React.ReactNode> = {
   "lumina-wedding": () => <LuminaPreview />,
   "atelier-bakery": () => <AtelierPreview />,
+  "law-office": () => <LawPreview />,
 };
 
 export function generateStaticParams() {
