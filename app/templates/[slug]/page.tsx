@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { templates } from "@/lib/content";
 import Reveal from "@/components/ui/Reveal";
 import TemplatePreview from "@/components/ui/TemplatePreview";
-import TemplateMockup, { TemplateFlex } from "@/components/ui/TemplateDetails";
+import { TemplateFlex } from "@/components/ui/TemplateDetails";
+import { LuminaScreen } from "@/components/templates/LuminaScreens";
 
 export function generateStaticParams() {
   return templates.map((t) => ({ slug: t.slug }));
@@ -228,17 +229,17 @@ export default async function TemplatePage({ params }: { params: Promise<{ slug:
               </p>
 
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                <Figure caption="Первый экран" hint="Заголовок, кнопки и баннер-полоса из четырёх кадров. Одно «главное» фото сюда не ставим: фотографу нужно показать диапазон работ, а не стоковую картинку. Место кнопок не двигаем, меняем текст.">
-                  <TemplateMockup t={t} variant="hero" />
+                <Figure caption="Первый экран" hint="Заголовок, кнопки и мозаика из четырёх кадров. Одно «главное» фото сюда не ставим: фотографу нужно показать диапазон работ, а не стоковую картинку. Место кнопок не двигаем, меняем текст.">
+                  <LuminaScreen variant="hero" />
                 </Figure>
                 <Figure caption="Портфолио" hint="Сетка работ с фильтром по категориям. Категории и снимки — ваши, мы только настраиваем сетку и лёгкое увеличение по клику.">
-                  <TemplateMockup t={t} variant="gallery" />
+                  <LuminaScreen variant="gallery" />
                 </Figure>
                 <Figure caption="Услуги и цены" hint="Три пакета карточками, средний выделен бейджем и поднят. Состав пакетов и цены — полностью ваши.">
-                  <TemplateMockup t={t} variant="price" />
+                  <LuminaScreen variant="price" />
                 </Figure>
                 <Figure caption="Заявка и отзывы" hint="Отзывы держим рядом с формой: человек читает чужой опыт и только потом оставляет заявку. Поля формы настраиваем под вас.">
-                  <TemplateMockup t={t} variant="form" />
+                  <LuminaScreen variant="form" />
                 </Figure>
               </div>
             </div>
