@@ -102,9 +102,21 @@ function ServiceCard({ s }: { s: Service }) {
          * Оставляем только разовую цену внедрения — её выбор действительно
          * определяется продуктом.
          */}
+        {/*
+         * Подпись зависит от формата самой цены.
+         *
+         * Раньше здесь стояло жёсткое «Внедрение от», а цену писали как
+         * «25 000 ₽» — вместе читалось «Внедрение от 25 000 ₽». Теперь в
+         * setupFrom лежит либо «≈ 20 000 ₽» (оценка, «от» лишнее и противоречит
+         * знаку ≈), либо «от 40 000 ₽», где «от» несёт смысл нижней границы.
+         * Одна подпись на оба формата дала бы «Внедрение от ≈ 20 000 ₽», поэтому
+         * выбираем её по строке.
+         */}
         <div className="mt-auto flex items-end justify-between gap-4 border-t border-[var(--border)] pt-5">
           <div>
-            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">Внедрение от</div>
+            <div className="text-[0.68rem] uppercase tracking-[0.14em] text-[var(--muted)]">
+              {s.setupFrom.startsWith("от ") ? "Внедрение от" : "Внедрение"}
+            </div>
             <div className="font-display text-lg font-semibold tabular" style={{ color: s.accent }}>
               {s.setupFrom}
             </div>

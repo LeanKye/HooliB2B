@@ -18,12 +18,12 @@ import { scrollToId } from "@/components/providers/SmoothScroll";
  * несуществующим правилом.
  */
 const priceRows = [
-  { name: "Сайт-визитка", template: "25 000 ₽", custom: "60 000 ₽" },
-  { name: "Полноценный сайт", template: "60 000 ₽", custom: "150 000 ₽" },
-  { name: "CRM-система", template: "80 000 ₽", custom: "200 000 ₽" },
-  { name: "AI-ассистент", template: "70 000 ₽", custom: "180 000 ₽" },
-  { name: "Комбо-пакет (сайт + CRM + AI)", template: "180 000 ₽", custom: "450 000 ₽" },
-  { name: "Индивидуальная разработка", template: "—", custom: "от 300 000 ₽" },
+  { name: "Сайт-визитка", template: "≈ 20 000 ₽", custom: "≈ 60 000 ₽" },
+  { name: "Полноценный сайт", template: "≈ 60 000 ₽", custom: "≈ 150 000 ₽" },
+  { name: "CRM-система", template: "≈ 80 000 ₽", custom: "≈ 200 000 ₽" },
+  { name: "AI-ассистент", template: "от 40 000 ₽", custom: "от 40 000 ₽" },
+  { name: "Комбо-пакет (сайт + CRM + AI)", template: "≈ 180 000 ₽", custom: "≈ 450 000 ₽" },
+  { name: "Индивидуальная разработка", template: "—", custom: "Цена договорная" },
 ];
 
 function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number }) {
