@@ -161,7 +161,7 @@ export default function TemplateMockup({
           </div>
         </div>
 
-        <div className="relative px-4 pb-4 pt-6">
+        <div className="px-4 pb-4 pt-6">
           <div className="text-[0.95rem] font-semibold leading-tight" style={{ color: "#fff" }}>
             Свадебная
             <br />
@@ -170,14 +170,25 @@ export default function TemplateMockup({
           <div className="mt-1.5 text-[0.55rem] opacity-60" style={{ color: "#fff" }}>
             Тёплые кадры о вашем дне
           </div>
-          <div
-            className="relative mt-3 flex h-24 items-end justify-between rounded-xl p-2"
-            style={{ background: `linear-gradient(140deg, ${accent}55, ${extra}33)` }}
-          >
-            <span className="rounded-full bg-black/40 px-2 py-1 text-[0.5rem] text-white/80">будет ваше фото</span>
-            <span className="rounded-full px-2.5 py-1 text-[0.5rem] font-semibold" style={{ background: accent, color: bg }}>
+          <div className="mt-2 flex gap-1">
+            <span className="rounded-full px-2 py-1 text-[0.5rem] font-semibold" style={{ background: accent, color: bg }}>
               Смотреть работы
             </span>
+            <span className="rounded-full border border-white/25 px-2 py-1 text-[0.5rem] text-white/80">
+              Услуги
+            </span>
+          </div>
+          {/* Баннер-полоса из кадров, а не одно «главное» фото */}
+          <div className="mt-3 grid grid-cols-4 gap-1">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="relative flex h-14 items-end rounded-md p-1"
+                style={{ background: `linear-gradient(${140 + i * 22}deg, ${i % 2 ? extra : accent}66, #ffffff12)` }}
+              >
+                <span className="text-[0.4rem] leading-tight text-white/60">ваше</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
