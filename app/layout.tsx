@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import SmoothScroll from "@/components/providers/SmoothScroll";
-import AuroraBackground from "@/components/background/AuroraBackground";
-import SideNav from "@/components/ui/SideNav";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import SiteChrome from "@/components/layout/SiteChrome";
 
 export const metadata: Metadata = {
   title: "HooliB2B — digital-продукты для малого бизнеса",
@@ -51,9 +49,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <SmoothScroll>
-            <AuroraBackground />
-            <SideNav />
-            <ThemeToggle />
+            {/*
+             * Фон, навигация и кнопка темы. `SiteChrome` сам решает, нужны ли
+             * они на текущем маршруте: на предпросмотре показывается «чужой»
+             * сайт шаблона, и обвязка HooliB2B там только мешает.
+             */}
+            <SiteChrome />
             <div className="relative z-10">{children}</div>
           </SmoothScroll>
         </ThemeProvider>

@@ -42,8 +42,18 @@ export default async function PreviewPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      {/* Служебная полоса: показывает, что это демо, и возвращает на страницу шаблона */}
-      <div className="sticky top-0 z-40 border-b border-white/10 bg-[#0d0a12] px-4 py-2">
+      {/*
+       * Служебная полоса: показывает, что это демо, и возвращает на страницу
+       * шаблона.
+       *
+       * Она НЕ sticky — и это не случайно. Шапка самого шаблона липкая
+       * (`sticky top-0`): две полосы, обе прилипшие к верху, наезжали друг на
+       * друга, и шапка Lumina целиком уходила под служебную (её кнопка
+       * «Записаться» выглядывала узкой розовой полоской). Теперь полоса
+       * уезжает при прокрутке, а липкой остаётся ровно одна — шапка
+       * шаблона, как в настоящем сайте.
+       */}
+      <div className="relative z-40 border-b border-white/10 bg-[#0d0a12] px-4 py-2">
         <div className="mx-auto flex max-w-5xl items-center gap-3 text-[0.78rem]">
           <Link
             href={`/templates/${slug}/`}

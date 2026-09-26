@@ -41,13 +41,18 @@ const WORKS: { id: number; cat: Cat; title: string; place: string; hue: number }
 ];
 
 /**
- * Кадры для баннера на первом экране.
+ * Кадры для первого экрана.
  *
  * Берутся из WORKS — то есть это буквально кадры из портфолио, а не
  * отдельная декорация. Так человек видит на первом экране ровно то,
- * что потом листает ниже, и баннер не расходится с содержимым.
- * Подобраны так, чтобы рядом стояли разные жанры: свадьба, эмоции,
- * портрет, деталь — глаз считывает диапазон, а не одну картинку.
+ * что потом листает ниже, и блок не расходится с содержимым.
+ *
+ * Раскладка мозаики: крупный кадр слева (он и есть «лицо» работы),
+ * два меньших справа и широкая кинематографичная полоса внизу. Раньше
+ * здесь была сетка с `col-span-2` и `aspect-[3/4]` — из-за этого первый
+ * кадр вытягивался в плиту высотой под 700 px, а четвёртый уезжал на
+ * следующую строку, и вся полоса читалась как случайный набор плиток.
+ * Теперь высоты задаёт сама сетка строк, поэтому блок всегда ровный.
  */
 const HERO_SHOTS = [WORKS[0], WORKS[4], WORKS[2], WORKS[3]];
 
@@ -63,16 +68,34 @@ const REVIEWS = [
   { name: "Семья В.", text: "Семейная съёмка с детьми. Терпеливо, без навязчивых указаний, и ребёнок в итоге сам попросил ещё кадр." },
 ];
 
-/** Фото-заглушка: настоящих снимков нет, поэтому показываем градиент. */
-function Photo({ hue, label, tall = false }: { hue: number; label: string; tall?: boolean }) {
+/**
+ * Кадр-заглушка: настоящих снимков у шаблона нет, поэтому вместо фото —
+ * градиент из двух тонов. Подпись «ваше фото» честно говорит, что здесь
+ * будет материал клиента: на демо это полезнее красивой заглушки.
+ *
+ * Градиент лежит на отдельном слое, а не на самом блоке: только так он
+ * увеличивается при наведении (`.group-hover/photo:scale`), не растягивая
+ * вместе с собой скругление и подпись.
+ */
+function Photo({
+  hue,
+  label,
+  ratio = "aspect-[3/4]",
+}: {
+  hue: number;
+  label?: string;
+  ratio?: string;
+}) {
   return (
-    <div
-      className={`relative flex items-end overflow-hidden rounded-lg ${tall ? "aspect-[3/4]" : "aspect-[4/3]"}`}
-      style={{
-        background: `linear-gradient(${140 + hue}deg, hsl(${hue} 55% 42%), hsl(${hue + 26} 48% 26%))`,
-      }}
-    >
-      <span className="p-2 text-[0.65rem] leading-tight text-white/70">{label}</span>
+    <div className={`group/photo relative flex items-end overflow-hidden rounded-xl ${ratio}`}>
+      <span
+        aria-hidden
+        className="absolute inset-0 transition-transform duration-500 ease-out group-hover/photo:scale-[1.05]"
+        style={{
+          background: `linear-gradient(${140 + hue}deg, hsl(${hue} 55% 42%), hsl(${hue + 26} 48% 26%))`,
+        }}
+      />
+      {label && <span className="relative p-2 text-[0.65rem] leading-tight text-white/70">{label}</span>}
     </div>
   );
 }
@@ -98,8 +121,18 @@ export default function LuminaPreview() {
     if (Object.keys(next).length === 0) setSent(true);
   };
 
+  /*
+   * `min-h-[100svh]`, а не `min-h-full`: процентная высота от родителя без
+   * заданной высоты не работает, и низ длинной страницы «выползал» на цвет
+   * body сайта. `svh` учитывает, что на мобильных адресная строка то уезжает,
+   * то возвращается.
+   *
+   * `colorScheme: "dark"` — для нативных контролов: без него выпадающий список
+   * и календарь в поле «Дата съёмки» рисуются в системной теме (светлыми на
+   * белом) и выглядят чужеродно внутри тёмного шаблона.
+   */
   return (
-    <div className="min-h-full bg-[#17111c] text-white">
+    <div className="min-h-[100svh] bg-[#17111c] text-white" style={{ colorScheme: "dark" }}>
       {/* Шапка: на телефоне превращается в бургер — это и есть адаптив */}
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#17111c]/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
@@ -135,50 +168,84 @@ export default function LuminaPreview() {
       {/*
        * Первый экран.
        *
-       * Раньше здесь стояло одно большое вертикальное фото — и это плохой
-       * выбор именно для фотографа: он продаёт корпус работ, а одна
-       * «главная» картинка выглядит как сток и ничего не говорит о уровне
-       * съёмки. Поэтому первый экран — широкая полоса-баннер из четырёх
-       * кадров в разной высоте: она сразу показывает диапазон (свадьба,
-       * портрет, эмоции) и работает как приглашение листать дальше.
+       * Одно большое вертикальное фото здесь — плохой выбор именно для
+       * фотографа: он продаёт корпус работ, а одна «главная» картинка
+       * выглядит как сток и ничего не говорит об уровне съёмки. Поэтому
+       * справа стоит мозаика из четырёх кадров разного жанра (свадьба,
+       * эмоции, портрет, деталь): глаз считывает диапазон, а взгляд
+       * двигается по ленте и хочется листать дальше.
        *
-       * Кадры кликабельны и открывают тот же просмотр, что и в портфолио:
-       * человек может рассмотреть работу прямо с первого экрана.
+       * Все четыре кадра кликабельны и открывают тот же просмотр, что и
+       * в портфолио: рассмотреть работу можно прямо с первого экрана.
+       *
+       * На телефоне мозаика уходит под текст, на десктопе стоит справа
+       * от него — так заголовок и фотографии конкурируют за первый
+       * взгляд, а не выстраиваются в столбик.
        */}
-      <section className="mx-auto max-w-5xl px-4 pb-10 pt-12 sm:pt-20">
-        <h1 className="max-w-2xl text-[2.4rem] font-semibold leading-[1.05] sm:text-[3.6rem]">
-          Свадебная<br />фотография
-        </h1>
-        <p className="mt-4 max-w-lg text-[0.98rem] leading-relaxed text-white/70">
-          Тёплые кадры о вашем дне. Снимаем так, чтобы через десять лет
-          смотреть и улыбаться.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <a href="#portfolio" className="rounded-full bg-[#f472b6] px-6 py-3 text-sm font-semibold text-[#17111c] transition-opacity hover:opacity-90">
-            Смотреть работы
-          </a>
-          <a href="#prices" className="rounded-full border border-white/25 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/5">
-            Услуги и цены
-          </a>
+      <section className="mx-auto max-w-5xl px-4 pb-12 pt-10 sm:pt-16">
+        <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[1.05fr_1fr]">
+          <div>
+            <p className="text-[0.72rem] font-medium uppercase tracking-[0.22em] text-[#f472b6]">
+              Свадьбы · Портреты · Семья
+            </p>
+            <h1 className="mt-4 text-[2.4rem] font-semibold leading-[1.05] sm:text-[3.4rem]">
+              Свадебная
+              <br />
+              фотография
+            </h1>
+            <p className="mt-4 max-w-lg text-[0.98rem] leading-relaxed text-white/70">
+              Тёплые кадры о вашем дне. Снимаем так, чтобы через десять лет
+              смотреть и улыбаться.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a
+                href="#portfolio"
+                className="rounded-full bg-[#f472b6] px-6 py-3 text-sm font-semibold text-[#17111c] transition-opacity hover:opacity-90"
+              >
+                Смотреть работы
+              </a>
+              <a
+                href="#prices"
+                className="rounded-full border border-white/25 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/5"
+              >
+                Услуги и цены
+              </a>
+            </div>
+          </div>
+
+          {/*
+           * Мозаика из четырёх кадров. Пропорция контейнера задана явно
+           * (aspect), а высоты плиток — долями `grid-rows`: иначе строки
+           * `1fr` схлопываются под пустое содержимое и блок разъезжается.
+           *
+           * Телефон — ровная сетка 2×2. На десктопе один кадр занимает
+           * левую колонку целиком, справа два кадра стопкой, а внизу —
+           * широкая горизонтальная полоса: взгляд идёт сверху вниз
+           * и вправо, и рядом стоят кадры разного жанра.
+           */}
+          <div className="grid aspect-[4/5] grid-cols-2 grid-rows-2 gap-2.5 sm:aspect-square sm:grid-cols-3 sm:grid-rows-3 sm:gap-3">
+            {HERO_SHOTS.map((s, i) => {
+              const area = [
+                "col-span-1 row-span-1 sm:col-span-2 sm:row-span-3",
+                "col-span-1 row-span-1 sm:col-span-1 sm:row-span-2",
+                "col-span-1 row-span-1 sm:col-span-1 sm:row-span-1",
+                "col-span-1 row-span-1 sm:col-span-2 sm:row-span-1",
+              ][i];
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setLightbox(s.id)}
+                  className={`group block overflow-hidden rounded-xl ${area}`}
+                >
+                  <Photo hue={s.hue} label="ваше фото" ratio="h-full w-full" />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Баннер: четыре кадра вразнобой, чтобы взгляд двигался по ленте */}
-        <div className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
-          {HERO_SHOTS.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setLightbox(s.id)}
-              className={`group relative overflow-hidden rounded-xl transition-transform duration-300 hover:-translate-y-1 ${
-                i === 0 ? "col-span-2 sm:col-span-2" : ""
-              }`}
-            >
-              <Photo hue={s.hue} label="ваше фото" tall={i !== 1 && i !== 2} />
-            </button>
-          ))}
-        </div>
-
-        <p className="mt-3 text-center text-[0.75rem] text-white/45 sm:text-left">
+        <p className="mt-6 text-[0.75rem] text-white/45 sm:text-center">
           Четыре кадра из портфолио — здесь будут ваши работы
         </p>
       </section>
@@ -205,7 +272,7 @@ export default function LuminaPreview() {
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shown.map((w) => (
             <button key={w.id} type="button" onClick={() => setLightbox(w.id)} className="text-left">
-              <Photo hue={w.hue} label={`${w.title} · ${w.place}`} tall />
+              <Photo hue={w.hue} label={`${w.title} · ${w.place}`} />
             </button>
           ))}
         </div>
@@ -346,7 +413,6 @@ export default function LuminaPreview() {
             <Photo
               hue={WORKS.find((w) => w.id === lightbox)?.hue ?? 12}
               label={WORKS.find((w) => w.id === lightbox)?.title ?? ""}
-              tall
             />
             <button
               type="button"
