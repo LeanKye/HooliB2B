@@ -6,6 +6,7 @@ import { templates } from "@/lib/content";
 import Section from "@/components/ui/Section";
 import Reveal from "@/components/ui/Reveal";
 import TemplatePreview from "@/components/ui/TemplatePreview";
+import { TemplateCardPreview } from "@/components/templates/registry";
 import { scrollToId } from "@/components/providers/SmoothScroll";
 
 type Filter = "all" | "card" | "full";
@@ -22,7 +23,11 @@ function TemplateCard({ t }: { t: (typeof templates)[number] }) {
   return (
     <div className="glass group flex h-full flex-col overflow-hidden rounded-3xl p-3 transition-transform duration-500 hover:-translate-y-1.5">
       <div className="overflow-hidden rounded-2xl">
-        <TemplatePreview t={t} className="transition-transform duration-500 group-hover:scale-[1.03]" />
+        <TemplateCardPreview
+          slug={t.slug}
+          className="transition-transform duration-500 group-hover:scale-[1.03]"
+          fallback={<TemplatePreview t={t} className="transition-transform duration-500 group-hover:scale-[1.03]" />}
+        />
       </div>
 
       <div className="flex flex-1 flex-col p-3 pt-4">
