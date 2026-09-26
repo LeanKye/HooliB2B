@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AtelierCardPreview } from "./AtelierScreens";
 import { LuminaCardPreview } from "./LuminaScreens";
 
 /**
@@ -7,10 +8,11 @@ import { LuminaCardPreview } from "./LuminaScreens";
  *
  * Реестр нужен, чтобы каталог не знал про шаблоны поимённо: добавили
  * шаблон с превью — он появляется здесь сам, а не правкой в каталоге.
- * Иначе «уже есть превью» снова разъедется с «уже есть предпросмотр».
+ * Иначе «уже есть превью» снова разойдётся с «уже есть предпросмотр».
  */
 const CARD_PREVIEWS: Record<string, (props: { className?: string }) => ReactNode> = {
   "lumina-wedding": (props) => <LuminaCardPreview {...props} />,
+  "atelier-bakery": (props) => <AtelierCardPreview {...props} />,
 };
 
 /** Есть ли у шаблона настоящее превью вместо схемы. */

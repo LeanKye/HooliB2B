@@ -319,6 +319,7 @@ export const templates: Template[] = [
       { caption: "Корзина", hint: "Список позиций и отправка заказа в мессенджер" },
     ],
     accent: "#fbbf24",
+    detailed: true,
     preview: ["#33240f", "#fbbf24", "#f472b6"],
   },
   {

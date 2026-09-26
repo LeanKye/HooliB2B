@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { templates } from "@/lib/content";
+import AtelierPreview from "@/components/templates/AtelierPreview";
 import LuminaPreview from "@/components/templates/LuminaPreview";
 
+/**
+ * Живой предпросмотр есть только у проработанных шаблонов, поэтому
+ * параметры берём из них же, а не перечисляем руками: иначе добавили
+ * шаблон, а страница предпросмотра про него забыла.
+ */
+const LIVE_PREVIEWS: Record<string, () => React.ReactNode> = {
+  "lumina-wedding": () => <LuminaPreview />,
+  "atelier-bakery": () => <AtelierPreview />,
+};
+
 export function generateStaticParams() {
-  return [{ slug: "lumina-wedding" }];
+  return Object.keys(LIVE_PREVIEWS).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -37,8 +48,9 @@ export async function generateMetadata({
 export default async function PreviewPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const t = templates.find((x) => x.slug === slug);
+  const Preview = LIVE_PREVIEWS[slug];
   // Предпросмотр есть только у проработанного шаблона.
-  if (!t || !t.detailed) notFound();
+  if (!t || !Preview) notFound();
 
   return (
     <>
@@ -70,7 +82,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <LuminaPreview />
+      <Preview />
     </>
   );
 }
